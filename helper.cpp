@@ -1,6 +1,6 @@
 #include "helper.h"
 
-#include <exiv2/exiv2.hpp>
+#include <exiv2/image.hpp>
 
 #include <stdio.h>
 
