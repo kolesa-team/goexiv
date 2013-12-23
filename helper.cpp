@@ -87,8 +87,9 @@ exiv2_exif_data_find_key(const Exiv2ExifData *data, const char *key, Exiv2Error 
 	} catch (Exiv2::Error &e) {
 		if (error) {
 			*error = new Exiv2Error(e);
-			return 0;
 		}
+
+		return 0;
 	}
 }
 
