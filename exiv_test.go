@@ -53,6 +53,12 @@ func TestMetadata(t *testing.T) {
 		t.Fatalf("Cannot read image metadata: %s", err)
 	}
 
+	width := img.PixelWidth()
+	height := img.PixelHeight()
+	if width != 1 || height != 1 {
+		t.Errorf("Cannot read image size (expected 1x1, got %dx%d)", width, height)
+	}
+
 	data := img.GetExifData()
 
 	// Invalid key

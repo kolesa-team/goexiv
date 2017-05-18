@@ -75,6 +75,14 @@ exiv2_image_read_metadata(Exiv2Image *img, Exiv2Error **error)
 
 DEFINE_FREE_FUNCTION(exiv2_image, Exiv2Image*);
 
+int exiv2_image_get_pixel_width(Exiv2Image *img) {
+	return img->image->pixelWidth();
+}
+
+int exiv2_image_get_pixel_height(Exiv2Image *img) {
+	return img->image->pixelHeight();
+}
+
 // XMP
 Exiv2XmpData*
 exiv2_image_get_xmp_data(const Exiv2Image *img)
@@ -108,7 +116,7 @@ exiv2_xmp_datum_to_string(const Exiv2XmpDatum *datum)
 {
     Exiv2::TypeId typeId = datum->datum.typeId();
 
-    const std::string strval;
+    std::string strval;
 
     if (typeId == Exiv2::xmpBag) {
         strval = datum->datum.toString();

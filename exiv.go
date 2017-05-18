@@ -76,3 +76,11 @@ func (i *Image) ReadMetadata() error {
 
 	return nil
 }
+
+func (i *Image) PixelWidth() int64 {
+	return int64(C.exiv2_image_get_pixel_width(i.img));
+}
+
+func (i *Image) PixelHeight() int64 {
+	return int64(C.exiv2_image_get_pixel_height(i.img));
+}

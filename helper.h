@@ -19,6 +19,9 @@ Exiv2Image* exiv2_image_factory_open(const char *path, Exiv2Error **error);
 void exiv2_image_read_metadata(Exiv2Image *img, Exiv2Error **error);
 void exiv2_image_free(Exiv2Image *img);
 
+int exiv2_image_get_pixel_width(Exiv2Image *img);
+int exiv2_image_get_pixel_height(Exiv2Image *img);
+
 Exiv2XmpData* exiv2_image_get_xmp_data(const Exiv2Image *img);
 void exiv2_xmp_data_free(Exiv2XmpData *data);
 char* exiv2_xmp_datum_to_string(const Exiv2XmpDatum *datum);
