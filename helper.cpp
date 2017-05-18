@@ -106,7 +106,16 @@ DEFINE_FREE_FUNCTION(exiv2_xmp_data, Exiv2XmpData*);
 char*
 exiv2_xmp_datum_to_string(const Exiv2XmpDatum *datum)
 {
-	const std::string strval = datum->datum.toString(0);
+    Exiv2::TypeId typeId = datum->datum.typeId();
+
+    const std::string strval;
+
+    if (typeId == Exiv2::xmpBag) {
+        strval = datum->datum.toString();
+    } else {
+        strval = datum->datum.toString(0);
+    }
+
 	return strdup(strval.c_str());
 }
 
