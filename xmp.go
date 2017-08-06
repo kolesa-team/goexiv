@@ -10,7 +10,6 @@ import (
 	"unsafe"
 )
 
-
 type XmpData struct {
 	img  *Image // We point to img to keep it alive
 	data *C.Exiv2XmpData
@@ -69,6 +68,7 @@ func (d *XmpData) FindKey(key string) (*XmpDatum, error) {
 		return nil, err
 	}
 
+	runtime.KeepAlive(d)
 	return makeXmpDatum(d, cdatum), nil
 }
 
