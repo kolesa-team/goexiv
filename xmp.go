@@ -10,11 +10,13 @@ import (
 	"unsafe"
 )
 
+// XmpData contains all Xmp Data of an image.
 type XmpData struct {
 	img  *Image // We point to img to keep it alive
 	data *C.Exiv2XmpData
 }
 
+// XmpDatum stores the info of one xmp datum.
 type XmpDatum struct {
 	data  *XmpData
 	datum *C.Exiv2XmpDatum
@@ -50,10 +52,14 @@ func makeXmpDatum(data *XmpData, cdatum *C.Exiv2XmpDatum) *XmpDatum {
 	return datum
 }
 
+// GetXmpData returns the XmpData of an Image.
 func (i *Image) GetXmpData() *XmpData {
 	return makeXmpData(i, C.exiv2_image_get_xmp_data(i.img))
 }
 
+// FindKey tries to find the specified key and returns its data.
+// It returns an error if the key is invalid. If the key is not found, a
+// nil pointer will be returned
 func (d *XmpData) FindKey(key string) (*XmpDatum, error) {
 	ckey := C.CString(key)
 	defer C.free(unsafe.Pointer(ckey))
