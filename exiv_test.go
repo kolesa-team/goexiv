@@ -128,23 +128,45 @@ func TestMetadata(t *testing.T) {
 	}
 
 	// Iterate over all Exif data accessing Key() and String()
-	keyValues := map[string]string{}
-	for i := data.Iterator(); i.HasNext(); {
-		d := i.Next()
-		keyValues[d.Key()] = d.String()
+	{
+		keyValues := map[string]string{}
+		for i := data.Iterator(); i.HasNext(); {
+			d := i.Next()
+			keyValues[d.Key()] = d.String()
+		}
+		assert.Equal(t, keyValues, map[string]string{
+			"Exif.Image.ExifTag":                 "134",
+			"Exif.Image.Make":                    "FakeMake",
+			"Exif.Image.Model":                   "FakeModel",
+			"Exif.Image.ResolutionUnit":          "2",
+			"Exif.Image.XResolution":             "72/1",
+			"Exif.Image.YCbCrPositioning":        "1",
+			"Exif.Image.YResolution":             "72/1",
+			"Exif.Photo.ColorSpace":              "65535",
+			"Exif.Photo.ComponentsConfiguration": "1 2 3 0",
+			"Exif.Photo.DateTimeDigitized":       "2013:12:08 21:06:10",
+			"Exif.Photo.ExifVersion":             "48 50 51 48",
+			"Exif.Photo.FlashpixVersion":         "48 49 48 48",
+		})
 	}
-	assert.Equal(t, keyValues, map[string]string{
-		"Exif.Image.ExifTag":                 "134",
-		"Exif.Image.Make":                    "FakeMake",
-		"Exif.Image.Model":                   "FakeModel",
-		"Exif.Image.ResolutionUnit":          "2",
-		"Exif.Image.XResolution":             "72/1",
-		"Exif.Image.YCbCrPositioning":        "1",
-		"Exif.Image.YResolution":             "72/1",
-		"Exif.Photo.ColorSpace":              "65535",
-		"Exif.Photo.ComponentsConfiguration": "1 2 3 0",
-		"Exif.Photo.DateTimeDigitized":       "2013:12:08 21:06:10",
-		"Exif.Photo.ExifVersion":             "48 50 51 48",
-		"Exif.Photo.FlashpixVersion":         "48 49 48 48",
-	})
+
+	//
+	// IPTC
+	//
+	iptcData := img.GetIptcData()
+
+	// Iterate over all IPCT data accessing Key() and String()
+	{
+		keyValues := map[string]string{}
+		for i := iptcData.Iterator(); i.HasNext(); {
+			d := i.Next()
+			keyValues[d.Key()] = d.String()
+		}
+		assert.Equal(t, keyValues, map[string]string{
+			"Iptc.Application2.Copyright":   "this is the copy, right?",
+			"Iptc.Application2.CountryName": "Lancre",
+			"Iptc.Application2.DateCreated": "1848-10-13",
+			"Iptc.Application2.TimeCreated": "12:49:32+01:00",
+		})
+	}
 }

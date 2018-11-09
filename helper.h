@@ -10,11 +10,13 @@ DECLARE_STRUCT(Exiv2XmpData);
 DECLARE_STRUCT(Exiv2XmpDatum);
 DECLARE_STRUCT(Exiv2IptcData);
 DECLARE_STRUCT(Exiv2IptcDatum);
+DECLARE_STRUCT(Exiv2IptcDatumIterator);
 DECLARE_STRUCT(Exiv2ExifData);
 DECLARE_STRUCT(Exiv2ExifDatum);
 DECLARE_STRUCT(Exiv2ExifDatumIterator);
 DECLARE_STRUCT(Exiv2Error);
 
+void exiv2_iptc_datum_iterator_free(Exiv2IptcDatumIterator *datum);
 void exiv2_exif_datum_iterator_free(Exiv2ExifDatumIterator *datum);
 
 Exiv2Image* exiv2_image_factory_open(const char *path, Exiv2Error **error);
@@ -34,9 +36,13 @@ Exiv2XmpDatum* exiv2_xmp_data_find_key(const Exiv2XmpData *data, const char *key
 
 Exiv2IptcData* exiv2_image_get_iptc_data(const Exiv2Image *img);
 void exiv2_iptc_data_free(Exiv2IptcData *data);
-char* exiv2_iptc_datum_to_string(const Exiv2IptcDatum *datum);
+const char* exiv2_iptc_datum_key(const Exiv2IptcDatum *datum);
+const char* exiv2_iptc_datum_to_string(const Exiv2IptcDatum *datum);
 void exiv2_iptc_datum_free(Exiv2IptcDatum *datum);
 Exiv2IptcDatum* exiv2_iptc_data_find_key(const Exiv2IptcData *data, const char *key, Exiv2Error **error);
+Exiv2IptcDatumIterator* exiv2_iptc_data_iterator(const Exiv2IptcData *data);
+int exiv2_iptc_data_iterator_has_next(const Exiv2IptcDatumIterator *iter);
+Exiv2IptcDatum* exiv2_iptc_datum_iterator_next(Exiv2IptcDatumIterator *iter);
 
 Exiv2ExifData* exiv2_image_get_exif_data(const Exiv2Image *img);
 const char* exiv2_exif_datum_key(const Exiv2ExifDatum *datum);

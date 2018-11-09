@@ -36,7 +36,16 @@ struct _Exiv2ExifDatumIterator {
 
 DEFINE_STRUCT(Exiv2IptcData, const Exiv2::IptcData&, data);
 DEFINE_STRUCT(Exiv2IptcDatum, const Exiv2::Iptcdatum&, datum);
+struct _Exiv2IptcDatumIterator {
+	_Exiv2IptcDatumIterator(Exiv2::IptcMetadata::const_iterator i, Exiv2::IptcMetadata::const_iterator e) : it(i), end(e) {}
+	Exiv2::IptcMetadata::const_iterator it;
+	Exiv2::IptcMetadata::const_iterator end;
 
+	bool has_next() const;
+	Exiv2IptcDatum* next();
+};
+
+DEFINE_FREE_FUNCTION(exiv2_iptc_datum_iterator, Exiv2IptcDatumIterator*)
 DEFINE_FREE_FUNCTION(exiv2_exif_datum_iterator, Exiv2ExifDatumIterator*)
 
 struct _Exiv2Error {
@@ -185,13 +194,44 @@ exiv2_iptc_data_find_key(const Exiv2IptcData *data, const char *key, Exiv2Error 
 	}
 }
 
+Exiv2IptcDatumIterator* exiv2_iptc_data_iterator(const Exiv2IptcData *data)
+{
+	return new Exiv2IptcDatumIterator(data->data.begin(), data->data.end());
+}
+
+bool Exiv2IptcDatumIterator::has_next() const
+{
+	return it != end;
+}
+
+int exiv2_iptc_data_iterator_has_next(const Exiv2IptcDatumIterator *iter)
+{
+	return iter->has_next() ? 1 : 0;
+}
+
+Exiv2IptcDatum* Exiv2IptcDatumIterator::next()
+{
+	if (it == end) {
+		return 0;
+	}
+	return new Exiv2IptcDatum(*it++);
+}
+
+Exiv2IptcDatum* exiv2_iptc_datum_iterator_next(Exiv2IptcDatumIterator *iter)
+{
+	return iter->next();
+}
+
 DEFINE_FREE_FUNCTION(exiv2_iptc_data, Exiv2IptcData*);
 
-char*
-exiv2_iptc_datum_to_string(const Exiv2IptcDatum *datum)
+const char* exiv2_iptc_datum_key(const Exiv2IptcDatum *datum)
 {
-	const std::string strval = datum->datum.toString(0);
-	return strdup(strval.c_str());
+	return datum->datum.key().c_str();
+}
+
+const char* exiv2_iptc_datum_to_string(const Exiv2IptcDatum *datum)
+{
+	return datum->datum.toString(0).c_str();
 }
 
 DEFINE_FREE_FUNCTION(exiv2_iptc_datum, Exiv2IptcDatum*);
