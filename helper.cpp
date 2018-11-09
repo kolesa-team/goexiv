@@ -25,9 +25,18 @@ DEFINE_STRUCT(Exiv2XmpDatum, const Exiv2::Xmpdatum&, datum);
 
 DEFINE_STRUCT(Exiv2ExifData, const Exiv2::ExifData&, data);
 DEFINE_STRUCT(Exiv2ExifDatum, const Exiv2::Exifdatum&, datum);
+struct _Exiv2ExifDatumIterator {
+	_Exiv2ExifDatumIterator(Exiv2::ExifMetadata::const_iterator i, Exiv2::ExifMetadata::const_iterator e) : it(i), end(e) {}
+	Exiv2::ExifMetadata::const_iterator it;
+	Exiv2::ExifMetadata::const_iterator end;
+
+	Exiv2ExifDatum* next();
+};
 
 DEFINE_STRUCT(Exiv2IptcData, const Exiv2::IptcData&, data);
 DEFINE_STRUCT(Exiv2IptcDatum, const Exiv2::Iptcdatum&, datum);
+
+DEFINE_FREE_FUNCTION(exiv2_exif_datum_iterator, Exiv2ExifDatumIterator*)
 
 struct _Exiv2Error {
 	_Exiv2Error(const Exiv2::Error &error);
@@ -211,6 +220,24 @@ exiv2_exif_data_find_key(const Exiv2ExifData *data, const char *key, Exiv2Error 
 
 		return 0;
 	}
+}
+
+Exiv2ExifDatumIterator* exiv2_exif_data_iterator(const Exiv2ExifData *data)
+{
+	return new Exiv2ExifDatumIterator(data->data.begin(), data->data.end());
+}
+
+Exiv2ExifDatum* Exiv2ExifDatumIterator::next()
+{
+	if (it == end) {
+		return 0;
+	}
+	return new Exiv2ExifDatum(*it++);
+}
+
+Exiv2ExifDatum* exiv2_exif_datum_iterator_next(Exiv2ExifDatumIterator *iter)
+{
+	return iter->next();
 }
 
 DEFINE_FREE_FUNCTION(exiv2_exif_data, Exiv2ExifData*);

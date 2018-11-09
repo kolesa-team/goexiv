@@ -12,7 +12,10 @@ DECLARE_STRUCT(Exiv2IptcData);
 DECLARE_STRUCT(Exiv2IptcDatum);
 DECLARE_STRUCT(Exiv2ExifData);
 DECLARE_STRUCT(Exiv2ExifDatum);
+DECLARE_STRUCT(Exiv2ExifDatumIterator);
 DECLARE_STRUCT(Exiv2Error);
+
+void exiv2_exif_datum_iterator_free(Exiv2ExifDatumIterator *datum);
 
 Exiv2Image* exiv2_image_factory_open(const char *path, Exiv2Error **error);
 Exiv2Image* exiv2_image_factory_open_bytes(const unsigned char *path, long size, Exiv2Error **error);
@@ -40,6 +43,8 @@ char* exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum);
 void exiv2_exif_datum_free(Exiv2ExifDatum *datum);
 void exiv2_exif_data_free(Exiv2ExifData *data);
 Exiv2ExifDatum* exiv2_exif_data_find_key(const Exiv2ExifData *data, const char *key, Exiv2Error **error);
+Exiv2ExifDatumIterator* exiv2_exif_data_iterator(const Exiv2ExifData *data);
+Exiv2ExifDatum* exiv2_exif_datum_iterator_next(Exiv2ExifDatumIterator *iter);
 
 int exiv2_error_code(const Exiv2Error *e);
 const char *exiv2_error_what(const Exiv2Error *e);
