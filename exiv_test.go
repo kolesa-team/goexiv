@@ -1,9 +1,14 @@
 package goexiv_test
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/toaster/goexiv"
 )
 
 func TestOpenImage(t *testing.T) {
@@ -38,6 +43,28 @@ func TestOpenImage(t *testing.T) {
 
 	if exivErr.Code() != 9 {
 		t.Fatalf("Unexpected error code (expected 9, got %d)", exivErr.Code())
+	}
+}
+
+func Test_OpenBytes(t *testing.T) {
+	wd, _ := os.Getwd()
+	testImage := path.Join(wd, "pixel.jpg")
+	bytes, err := ioutil.ReadFile(testImage)
+	require.NoError(t, err)
+
+	img, err := goexiv.OpenBytes(bytes)
+	if assert.NoError(t, err) {
+		assert.NotNil(t, img)
+	}
+}
+
+func Test_OpenBytesFailure(t *testing.T) {
+	_, err := goexiv.OpenBytes([]byte("no image"))
+	if assert.Error(t, err) {
+		exivErr, ok := err.(*goexiv.Error)
+		if assert.True(t, ok, "occurred error is not of Type Error") {
+			assert.Equal(t, 12, exivErr.Code(), "unexpected error code")
+		}
 	}
 }
 

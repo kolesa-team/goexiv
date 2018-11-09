@@ -61,6 +61,25 @@ exiv2_image_factory_open(const char *path, Exiv2Error **error)
 	return 0;
 }
 
+Exiv2Image*
+exiv2_image_factory_open_bytes(const unsigned char *bytes, long size, Exiv2Error **error)
+{
+	Exiv2Image *p = 0;
+
+	try {
+		p = new Exiv2Image(Exiv2::ImageFactory::open(bytes, size));
+		return p;
+	} catch (Exiv2::Error &e) {
+		delete p;
+
+		if (error) {
+			*error = new Exiv2Error(e);
+		}
+	}
+
+	return 0;
+}
+
 void
 exiv2_image_read_metadata(Exiv2Image *img, Exiv2Error **error)
 {
