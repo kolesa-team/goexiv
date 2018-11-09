@@ -45,6 +45,7 @@ void exiv2_exif_datum_free(Exiv2ExifDatum *datum);
 void exiv2_exif_data_free(Exiv2ExifData *data);
 Exiv2ExifDatum* exiv2_exif_data_find_key(const Exiv2ExifData *data, const char *key, Exiv2Error **error);
 Exiv2ExifDatumIterator* exiv2_exif_data_iterator(const Exiv2ExifData *data);
+int exiv2_exif_data_iterator_has_next(const Exiv2ExifDatumIterator *iter);
 Exiv2ExifDatum* exiv2_exif_datum_iterator_next(Exiv2ExifDatumIterator *iter);
 
 int exiv2_error_code(const Exiv2Error *e);

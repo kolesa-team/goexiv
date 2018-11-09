@@ -91,6 +91,11 @@ func (d *ExifData) Iterator() *ExifDatumIterator {
 	return makeExifDatumIterator(d, C.exiv2_exif_data_iterator(d.data))
 }
 
+// HasNext returns true as long as the iterator has another datum to deliver.
+func (i *ExifDatumIterator) HasNext() bool {
+	return C.exiv2_exif_data_iterator_has_next(i.iter) != 0
+}
+
 // Next returns the next ExifDatum of the iterator or nil if iterator has reached the end.
 func (i *ExifDatumIterator) Next() *ExifDatum {
 	return makeExifDatum(i.data, C.exiv2_exif_datum_iterator_next(i.iter))

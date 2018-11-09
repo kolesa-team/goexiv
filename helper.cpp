@@ -30,6 +30,7 @@ struct _Exiv2ExifDatumIterator {
 	Exiv2::ExifMetadata::const_iterator it;
 	Exiv2::ExifMetadata::const_iterator end;
 
+	bool has_next() const;
 	Exiv2ExifDatum* next();
 };
 
@@ -225,6 +226,16 @@ exiv2_exif_data_find_key(const Exiv2ExifData *data, const char *key, Exiv2Error 
 Exiv2ExifDatumIterator* exiv2_exif_data_iterator(const Exiv2ExifData *data)
 {
 	return new Exiv2ExifDatumIterator(data->data.begin(), data->data.end());
+}
+
+bool Exiv2ExifDatumIterator::has_next() const
+{
+	return it != end;
+}
+
+int exiv2_exif_data_iterator_has_next(const Exiv2ExifDatumIterator *iter)
+{
+	return iter->has_next() ? 1 : 0;
 }
 
 Exiv2ExifDatum* Exiv2ExifDatumIterator::next()
