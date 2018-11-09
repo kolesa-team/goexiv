@@ -242,11 +242,14 @@ Exiv2ExifDatum* exiv2_exif_datum_iterator_next(Exiv2ExifDatumIterator *iter)
 
 DEFINE_FREE_FUNCTION(exiv2_exif_data, Exiv2ExifData*);
 
-char*
-exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum)
+const char* exiv2_exif_datum_key(const Exiv2ExifDatum *datum)
 {
-	const std::string strval = datum->datum.toString();
-	return strdup(strval.c_str());
+	return datum->datum.key().c_str();
+}
+
+const char* exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum)
+{
+	return datum->datum.toString().c_str();
 }
 
 DEFINE_FREE_FUNCTION(exiv2_exif_datum, Exiv2ExifDatum*);

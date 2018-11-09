@@ -39,7 +39,8 @@ void exiv2_iptc_datum_free(Exiv2IptcDatum *datum);
 Exiv2IptcDatum* exiv2_iptc_data_find_key(const Exiv2IptcData *data, const char *key, Exiv2Error **error);
 
 Exiv2ExifData* exiv2_image_get_exif_data(const Exiv2Image *img);
-char* exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum);
+const char* exiv2_exif_datum_key(const Exiv2ExifDatum *datum);
+const char* exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum);
 void exiv2_exif_datum_free(Exiv2ExifDatum *datum);
 void exiv2_exif_data_free(Exiv2ExifData *data);
 Exiv2ExifDatum* exiv2_exif_data_find_key(const Exiv2ExifData *data, const char *key, Exiv2Error **error);
