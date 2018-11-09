@@ -1,4 +1,4 @@
-package goexiv
+package goexiv_test
 
 import (
 	"os"
@@ -12,7 +12,7 @@ func TestOpenImage(t *testing.T) {
 
 	// Open valid file
 
-	img, err := Open(testImage)
+	img, err := goexiv.Open(testImage)
 
 	if err != nil {
 		t.Fatalf("Cannot open image: %s", err)
@@ -24,13 +24,13 @@ func TestOpenImage(t *testing.T) {
 
 	// Open non existing file
 
-	img, err = Open("thisimagedoesnotexist")
+	img, err = goexiv.Open("thisimagedoesnotexist")
 
 	if err == nil {
 		t.Fatalf("No error set after opening a non existing image")
 	}
 
-	exivErr, ok := err.(*Error)
+	exivErr, ok := err.(*goexiv.Error)
 
 	if !ok {
 		t.Fatalf("Returned error is not of type Error")
@@ -45,7 +45,7 @@ func TestMetadata(t *testing.T) {
 	wd, _ := os.Getwd()
 	testImage := path.Join(wd, "pixel.jpg")
 
-	img, _ := Open(testImage)
+	img, _ := goexiv.Open(testImage)
 
 	err := img.ReadMetadata()
 
