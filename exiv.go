@@ -66,6 +66,22 @@ func Open(path string) (*Image, error) {
 	return makeImage(cimg), nil
 }
 
+// OpenBytes opens a byte slice with image data and returns a pointer to
+// the corresponding Image object, but does not read the Metadata.
+// Start the parsing with a call to ReadMetadata()
+func OpenBytes(b []byte) (*Image, error) {
+	var cerr *C.Exiv2Error
+	cimg := C.exiv2_image_factory_open_bytes((*C.uchar)(unsafe.Pointer(&b[0])), C.long(len(b)), &cerr)
+
+	if cerr != nil {
+		err := makeError(cerr)
+		C.exiv2_error_free(cerr)
+		return nil, err
+	}
+
+	return makeImage(cimg), nil
+}
+
 // ReadMetadata reads the metadata of an Image
 func (i *Image) ReadMetadata() error {
 	var cerr *C.Exiv2Error
