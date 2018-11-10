@@ -70,6 +70,9 @@ func Open(path string) (*Image, error) {
 // the corresponding Image object, but does not read the Metadata.
 // Start the parsing with a call to ReadMetadata()
 func OpenBytes(b []byte) (*Image, error) {
+	if len(b) == 0 {
+		return nil, &Error{0, "input is empty"}
+	}
 	var cerr *C.Exiv2Error
 	cimg := C.exiv2_image_factory_open_bytes((*C.uchar)(unsafe.Pointer(&b[0])), C.long(len(b)), &cerr)
 
