@@ -1,4 +1,4 @@
-module github.com/toaster/goexiv
+module github.com/gitschneider/goexiv
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
