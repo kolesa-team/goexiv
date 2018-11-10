@@ -58,13 +58,42 @@ func Test_OpenBytes(t *testing.T) {
 	}
 }
 
-func Test_OpenBytesFailure(t *testing.T) {
-	_, err := goexiv.OpenBytes([]byte("no image"))
-	if assert.Error(t, err) {
-		exivErr, ok := err.(*goexiv.Error)
-		if assert.True(t, ok, "occurred error is not of Type Error") {
-			assert.Equal(t, 12, exivErr.Code(), "unexpected error code")
-		}
+func Test_OpenBytesFailures(t *testing.T) {
+	tests := []struct {
+		name        string
+		bytes       []byte
+		wantErr     string
+		wantErrCode int
+	}{
+		{
+			"no image",
+			[]byte("no image"),
+			"The memory contains data of an unknown image type",
+			12,
+		},
+		{
+			"empty byte slice",
+			[]byte{},
+			"input is empty",
+			0,
+		},
+		{
+			"nil byte slice",
+			nil,
+			"input is empty",
+			0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := goexiv.OpenBytes(tt.bytes)
+			if assert.EqualError(t, err, tt.wantErr) {
+				exivErr, ok := err.(*goexiv.Error)
+				if assert.True(t, ok, "occurred error is not of Type goexiv.Error") {
+					assert.Equal(t, tt.wantErrCode, exivErr.Code(), "unexpected error code")
+				}
+			}
+		})
 	}
 }
 
