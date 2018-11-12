@@ -2,8 +2,6 @@ package goexiv_test
 
 import (
 	"io/ioutil"
-	"os"
-	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,12 +10,8 @@ import (
 )
 
 func TestOpenImage(t *testing.T) {
-	wd, _ := os.Getwd()
-	testImage := path.Join(wd, "pixel.jpg")
-
 	// Open valid file
-
-	img, err := goexiv.Open(testImage)
+	img, err := goexiv.Open("testdata/pixel.jpg")
 
 	if err != nil {
 		t.Fatalf("Cannot open image: %s", err)
@@ -47,9 +41,7 @@ func TestOpenImage(t *testing.T) {
 }
 
 func Test_OpenBytes(t *testing.T) {
-	wd, _ := os.Getwd()
-	testImage := path.Join(wd, "pixel.jpg")
-	bytes, err := ioutil.ReadFile(testImage)
+	bytes, err := ioutil.ReadFile("testdata/pixel.jpg")
 	require.NoError(t, err)
 
 	img, err := goexiv.OpenBytes(bytes)
@@ -98,12 +90,10 @@ func Test_OpenBytesFailures(t *testing.T) {
 }
 
 func TestMetadata(t *testing.T) {
-	wd, _ := os.Getwd()
-	testImage := path.Join(wd, "pixel.jpg")
+	img, err := goexiv.Open("testdata/pixel.jpg")
+	require.NoError(t, err)
 
-	img, _ := goexiv.Open(testImage)
-
-	err := img.ReadMetadata()
+	err = img.ReadMetadata()
 
 	if err != nil {
 		t.Fatalf("Cannot read image metadata: %s", err)
