@@ -54,6 +54,9 @@ Exiv2ExifDatumIterator* exiv2_exif_data_iterator(const Exiv2ExifData *data);
 int exiv2_exif_data_iterator_has_next(const Exiv2ExifDatumIterator *iter);
 Exiv2ExifDatum* exiv2_exif_datum_iterator_next(Exiv2ExifDatumIterator *iter);
 
+const unsigned char* exiv2_image_icc_profile(Exiv2Image *img);
+long exiv2_image_icc_profile_size(Exiv2Image *img);
+
 int exiv2_error_code(const Exiv2Error *e);
 const char *exiv2_error_what(const Exiv2Error *e);
 void exiv2_error_free(Exiv2Error *e);
