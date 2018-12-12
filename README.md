@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/toaster/goexiv.svg)](https://travis-ci.org/toaster/goexiv.svg)
+
 # Go bindings for exiv2 (http://www.exiv2.org)
 
 Those bindings are at the moment (very) incomplete, but already allow you to
