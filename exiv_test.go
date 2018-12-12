@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/gitschneider/goexiv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/toaster/goexiv"
 )
 
 func TestOpenImage(t *testing.T) {
