@@ -2,9 +2,33 @@ language: go
 go: 1.11
 go_import_path: github.com/gitschneider/goexiv
 
-cache: apt
+cache:
+  apt: true
+  directories:
+    - exiv2
 
 addons:
   apt:
     packages:
-      - libexiv2-dev
+      - libexpat-dev
+      - libz-dev
+
+env:
+  - EXIV2_VERSION=0.26
+
+before_install:
+  - |
+    cd exiv2
+    test -d exiv2-${EXIV2_VERSION} && {
+      cd exiv2-${EXIV2_VERSION}
+    } || {
+      wget http://www.exiv2.org/builds/exiv2-${EXIV2_VERSION}-trunk.tar.gz
+      tar xzf exiv2-${EXIV2_VERSION}-trunk.tar.gz
+      mv exiv2-trunk exiv2-${EXIV2_VERSION}
+      cd exiv2-${EXIV2_VERSION}
+      ./configure
+      make
+    }
+    sudo make install
+    sudo ldconfig
+    cd ../..

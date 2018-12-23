@@ -9,7 +9,7 @@ requests :) ).
 
 ## Requirements
 
-You need to have libexiv2 installed.
+You need to have libexiv2 installed at version 0.26 at least.
 
 ### Debian/Ubuntu
 

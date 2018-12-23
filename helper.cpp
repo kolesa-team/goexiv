@@ -45,8 +45,8 @@ struct _Exiv2IptcDatumIterator {
 	Exiv2IptcDatum* next();
 };
 
-DEFINE_FREE_FUNCTION(exiv2_iptc_datum_iterator, Exiv2IptcDatumIterator*)
-DEFINE_FREE_FUNCTION(exiv2_exif_datum_iterator, Exiv2ExifDatumIterator*)
+DEFINE_FREE_FUNCTION(exiv2_iptc_datum_iterator, Exiv2IptcDatumIterator*);
+DEFINE_FREE_FUNCTION(exiv2_exif_datum_iterator, Exiv2ExifDatumIterator*);
 
 struct _Exiv2Error {
 	_Exiv2Error(const Exiv2::Error &error);
@@ -119,6 +119,22 @@ int exiv2_image_get_pixel_width(Exiv2Image *img) {
 
 int exiv2_image_get_pixel_height(Exiv2Image *img) {
 	return img->image->pixelHeight();
+}
+
+const unsigned char* exiv2_image_icc_profile(Exiv2Image *img)
+{
+	if (img->image->iccProfileDefined()) {
+		return img->image->iccProfile()->pData_;
+	}
+	return NULL;
+}
+
+long exiv2_image_icc_profile_size(Exiv2Image *img)
+{
+	if (img->image->iccProfileDefined()) {
+		return img->image->iccProfile()->size_;
+	}
+	return 0;
 }
 
 // XMP
