@@ -1,6 +1,6 @@
 language: go
 go: 1.11
-go_import_path: github.com/gitschneider/goexiv
+go_import_path: github.com/xapon/goexiv
 
 cache:
   apt: true
@@ -14,7 +14,7 @@ addons:
       - libz-dev
 
 env:
-  - EXIV2_VERSION=0.26
+  - EXIV2_VERSION=0.27
 
 before_install:
   - |
