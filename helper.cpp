@@ -150,6 +150,19 @@ exiv2_image_set_iptc_string(Exiv2Image *img, char *key, char *value, Exiv2Error 
 	}
 }
 
+long
+exiv_image_get_size(Exiv2Image *img)
+{
+    return (long)img->image->io().size();
+}
+
+unsigned char*
+exiv_image_get_bytes_ptr(Exiv2Image *img)
+{
+    return img->image->io().mmap();
+}
+
+
 DEFINE_FREE_FUNCTION(exiv2_image, Exiv2Image*);
 
 int exiv2_image_get_pixel_width(Exiv2Image *img) {

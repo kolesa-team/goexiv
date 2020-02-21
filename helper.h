@@ -22,6 +22,9 @@ void exiv2_exif_datum_iterator_free(Exiv2ExifDatumIterator *datum);
 Exiv2Image* exiv2_image_factory_open(const char *path, Exiv2Error **error);
 Exiv2Image* exiv2_image_factory_open_bytes(const unsigned char *path, long size, Exiv2Error **error);
 
+long exiv_image_get_size(Exiv2Image *img);
+unsigned char* exiv_image_get_bytes_ptr(Exiv2Image *img);
+
 void exiv2_image_read_metadata(Exiv2Image *img, Exiv2Error **error);
 void exiv2_image_set_exif_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error);
 void exiv2_image_set_iptc_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error);

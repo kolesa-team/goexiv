@@ -256,62 +256,62 @@ type MetadataTestCase struct {
 	ExpectedErrorSubstring string
 }
 
-func TestSetMetadataString(t *testing.T) {
-	cases := []MetadataTestCase{
-		// valid exif key, jpeg
-		{
-			Format:                 "exif",
-			Key:                    "Exif.Photo.UserComment",
-			Value:                  "Hello, world! Привет, мир!",
-			ImageFilename:          "testdata/pixel.jpg",
-			ExpectedErrorSubstring: "", // no error
-		},
-		// valid exif key, webp
-		{
-			Format:                 "exif",
-			Key:                    "Exif.Photo.UserComment",
-			Value:                  "Hello, world! Привет, мир!",
-			ImageFilename:          "testdata/pixel.webp",
-			ExpectedErrorSubstring: "",
-		},
-		// valid iptc key, jpeg.
-		// webp iptc is not supported (see libexiv2/src/webpimage.cpp WebPImage::setIptcData))
-		{
-			Format:                 "iptc",
-			Key:                    "Iptc.Application2.Caption",
-			Value:                  "Hello, world! Привет, мир!",
-			ImageFilename:          "testdata/pixel.jpg",
-			ExpectedErrorSubstring: "",
-		},
-		// invalid exif key, jpeg
-		{
-			Format:                 "exif",
-			Key:                    "Exif.Invalid.Key",
-			Value:                  "this value should not be written",
-			ImageFilename:          "testdata/pixel.jpg",
-			ExpectedErrorSubstring: "Invalid key",
-		},
-		// invalid exif key, webp
-		{
-			Format:                 "exif",
-			Key:                    "Exif.Invalid.Key",
-			Value:                  "this value should not be written",
-			ImageFilename:          "testdata/pixel.webp",
-			ExpectedErrorSubstring: "Invalid key",
-		},
-		// invalid iptc key, jpeg
-		{
-			Format:                 "iptc",
-			Key:                    "Iptc.Invalid.Key",
-			Value:                  "this value should not be written",
-			ImageFilename:          "testdata/pixel.jpg",
-			ExpectedErrorSubstring: "Invalid record name",
-		},
-	}
+var metadataTestCases = []MetadataTestCase{
+	// valid exif key, jpeg
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Photo.UserComment",
+		Value:                  "Hello, world! Привет, мир!",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "", // no error
+	},
+	// valid exif key, webp
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Photo.UserComment",
+		Value:                  "Hello, world! Привет, мир!",
+		ImageFilename:          "testdata/pixel.webp",
+		ExpectedErrorSubstring: "",
+	},
+	// valid iptc key, jpeg.
+	// webp iptc is not supported (see libexiv2/src/webpimage.cpp WebPImage::setIptcData))
+	{
+		Format:                 "iptc",
+		Key:                    "Iptc.Application2.Caption",
+		Value:                  "Hello, world! Привет, мир!",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "",
+	},
+	// invalid exif key, jpeg
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Invalid.Key",
+		Value:                  "this value should not be written",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "Invalid key",
+	},
+	// invalid exif key, webp
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Invalid.Key",
+		Value:                  "this value should not be written",
+		ImageFilename:          "testdata/pixel.webp",
+		ExpectedErrorSubstring: "Invalid key",
+	},
+	// invalid iptc key, jpeg
+	{
+		Format:                 "iptc",
+		Key:                    "Iptc.Invalid.Key",
+		Value:                  "this value should not be written",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "Invalid record name",
+	},
+}
 
+func Test_SetMetadataStringFromFile(t *testing.T) {
 	var data goexiv.MetadataProvider
 
-	for i, testcase := range cases {
+	for i, testcase := range metadataTestCases {
 		img, err := goexiv.Open(testcase.ImageFilename)
 		require.NoErrorf(t, err, "case #%d Error while opening image file", i)
 
@@ -326,9 +326,9 @@ func TestSetMetadataString(t *testing.T) {
 				i,
 			)
 			continue
-		} else {
-			require.NoErrorf(t, err, "case #%d Cannot write image metadata", i)
 		}
+
+		require.NoErrorf(t, err, "case #%d Cannot write image metadata", i)
 
 		err = img.ReadMetadata()
 		require.NoErrorf(t, err, "case #%d Cannot read image metadata", i)
@@ -348,4 +348,29 @@ func TestSetMetadataString(t *testing.T) {
 			i,
 		)
 	}
+}
+
+func Test_Bytes(t *testing.T) {
+	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
+	require.NoError(t, err)
+	img, err := goexiv.OpenBytes(bytes)
+	require.NoError(t, err)
+
+	require.Equal(
+		t,
+		len(bytes),
+		len(img.GetBytes()),
+		"Image size on disk and in memory must be equal",
+	)
+
+	require.NoError(
+		t,
+		img.SetExifString("Exif.Photo.UserComment", "test"),
+	)
+
+	require.True(
+		t,
+		len(img.GetBytes()) > len(bytes),
+		"Image size in memory must increase after writing exif key",
+	)
 }

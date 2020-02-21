@@ -7,6 +7,7 @@ import "C"
 
 import (
 	"errors"
+	"reflect"
 	"runtime"
 	"unsafe"
 )
@@ -105,6 +106,19 @@ func (i *Image) ReadMetadata() error {
 	}
 
 	return nil
+}
+
+func (i *Image) GetBytes() []byte {
+	size := int(C.exiv_image_get_size(i.img))
+	ptr := C.exiv_image_get_bytes_ptr(i.img)
+
+	var slice []byte
+	header := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
+	header.Cap = size
+	header.Len = size
+	header.Data = uintptr(unsafe.Pointer(ptr))
+
+	return slice
 }
 
 // PixelWidth returns the width of the image in pixels
