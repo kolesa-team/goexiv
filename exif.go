@@ -100,7 +100,10 @@ func (d *ExifDatum) Key() string {
 }
 
 func (d *ExifDatum) String() string {
-	return C.GoString(C.exiv2_exif_datum_to_string(d.datum))
+	cstr := C.exiv2_exif_datum_to_string(d.datum)
+	defer C.free(unsafe.Pointer(cstr))
+
+	return C.GoString(cstr)
 }
 
 // Iterator returns a new ExifDatumIterator to iterate over all Exif data.
