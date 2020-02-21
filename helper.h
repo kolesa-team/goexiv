@@ -23,6 +23,8 @@ Exiv2Image* exiv2_image_factory_open(const char *path, Exiv2Error **error);
 Exiv2Image* exiv2_image_factory_open_bytes(const unsigned char *path, long size, Exiv2Error **error);
 
 void exiv2_image_read_metadata(Exiv2Image *img, Exiv2Error **error);
+void exiv2_image_set_exif_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error);
+void exiv2_image_set_iptc_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error);
 void exiv2_image_free(Exiv2Image *img);
 
 int exiv2_image_get_pixel_width(Exiv2Image *img);

@@ -60,6 +60,23 @@ func (i *Image) GetExifData() *ExifData {
 	return makeExifData(i, C.exiv2_image_get_exif_data(i.img))
 }
 
+func (i *Image) SetExifString(key, value string) error {
+	return i.SetMetadataString("exif", key, value)
+}
+
+func (d *ExifData) GetString(key string) (string, error) {
+	datum, err := d.FindKey(key)
+	if err != nil {
+		return "", err
+	}
+
+	if datum == nil {
+		return "", errMetadataKeyNotFound
+	}
+
+	return datum.String(), nil
+}
+
 func (d *ExifData) FindKey(key string) (*ExifDatum, error) {
 	ckey := C.CString(key)
 	defer C.free(unsafe.Pointer(ckey))

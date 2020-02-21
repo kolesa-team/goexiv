@@ -1,6 +1,7 @@
 #include "helper.h"
 
 #include <exiv2/image.hpp>
+#include <exiv2/error.hpp>
 
 #include <stdio.h>
 
@@ -104,6 +105,43 @@ exiv2_image_read_metadata(Exiv2Image *img, Exiv2Error **error)
 {
 	try {
 		img->image->readMetadata();
+	} catch (Exiv2::Error &e) {
+		if (error) {
+			*error = new Exiv2Error(e);
+		}
+	}
+}
+
+void
+exiv2_image_set_exif_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error)
+{
+	Exiv2::ExifData exifData = img->image->exifData();
+
+	try {
+	    Exiv2::ExifKey keyObject(key);
+	    Exiv2::Value::AutoPtr valueObject = Exiv2::Value::create(Exiv2::asciiString);
+        valueObject->read(value);
+        exifData.add(keyObject, valueObject.get());
+		img->image->setExifData(exifData);
+		img->image->writeMetadata();
+	} catch (Exiv2::Error &e) {
+		if (error) {
+			*error = new Exiv2Error(e);
+		}
+	}
+}
+
+void
+exiv2_image_set_iptc_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error)
+{
+	Exiv2::IptcData iptcData = img->image->iptcData();
+	try {
+        Exiv2::StringValue valueObject;
+		valueObject.read(value);
+        iptcData[key] = valueObject;
+
+		img->image->setIptcData(iptcData);
+		img->image->writeMetadata();
 	} catch (Exiv2::Error &e) {
 		if (error) {
 			*error = new Exiv2Error(e);
@@ -247,7 +285,8 @@ const char* exiv2_iptc_datum_key(const Exiv2IptcDatum *datum)
 
 const char* exiv2_iptc_datum_to_string(const Exiv2IptcDatum *datum)
 {
-	return datum->datum.toString(0).c_str();
+	const std::string strval = datum->datum.toString();
+	return strdup(strval.c_str());
 }
 
 DEFINE_FREE_FUNCTION(exiv2_iptc_datum, Exiv2IptcDatum*);
@@ -316,7 +355,8 @@ const char* exiv2_exif_datum_key(const Exiv2ExifDatum *datum)
 
 const char* exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum)
 {
-	return datum->datum.toString().c_str();
+	const std::string strval = datum->datum.toString();
+	return strdup(strval.c_str());
 }
 
 DEFINE_FREE_FUNCTION(exiv2_exif_datum, Exiv2ExifDatum*);

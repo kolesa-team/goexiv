@@ -60,6 +60,23 @@ func (i *Image) GetIptcData() *IptcData {
 	return makeIptcData(i, C.exiv2_image_get_iptc_data(i.img))
 }
 
+func (i *Image) SetIptcString(key, value string) error {
+	return i.SetMetadataString("iptc", key, value)
+}
+
+func (d *IptcData) GetString(key string) (string, error) {
+	datum, err := d.FindKey(key)
+	if err != nil {
+		return "", err
+	}
+
+	if datum == nil {
+		return "", errMetadataKeyNotFound
+	}
+
+	return datum.String(), nil
+}
+
 func (d *IptcData) FindKey(key string) (*IptcDatum, error) {
 	ckey := C.CString(key)
 	defer C.free(unsafe.Pointer(ckey))

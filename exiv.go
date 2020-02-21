@@ -6,6 +6,7 @@ package goexiv
 import "C"
 
 import (
+	"errors"
 	"runtime"
 	"unsafe"
 )
@@ -18,6 +19,12 @@ type Error struct {
 type Image struct {
 	img *C.Exiv2Image
 }
+
+type MetadataProvider interface {
+	GetString(key string) (string, error)
+}
+
+var errMetadataKeyNotFound = errors.New("key not found")
 
 func (e *Error) Error() string {
 	return e.what
@@ -117,4 +124,35 @@ func (i *Image) ICCProfile() []byte {
 		return nil
 	}
 	return C.GoBytes(unsafe.Pointer(C.exiv2_image_icc_profile(i.img)), size)
+}
+
+// Sets an exif or iptc key with a given string value
+func (i *Image) SetMetadataString(format, key, value string) error {
+	if format != "iptc" && format != "exif" {
+		return errors.New("invalid metadata type: " + format)
+	}
+
+	cKey := C.CString(key)
+	cValue := C.CString(value)
+
+	defer func() {
+		C.free(unsafe.Pointer(cKey))
+		C.free(unsafe.Pointer(cValue))
+	}()
+
+	var cerr *C.Exiv2Error
+
+	if format == "iptc" {
+		C.exiv2_image_set_iptc_string(i.img, cKey, cValue, &cerr)
+	} else {
+		C.exiv2_image_set_exif_string(i.img, cKey, cValue, &cerr)
+	}
+
+	if cerr != nil {
+		err := makeError(cerr)
+		C.exiv2_error_free(cerr)
+		return err
+	}
+
+	return nil
 }

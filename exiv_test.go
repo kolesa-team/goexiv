@@ -247,3 +247,105 @@ func TestNoMetadata(t *testing.T) {
 
 	assert.Nil(t, img.ICCProfile())
 }
+
+type MetadataTestCase struct {
+	Format                 string // exif or iptc
+	Key                    string
+	Value                  string
+	ImageFilename          string
+	ExpectedErrorSubstring string
+}
+
+func TestSetMetadataString(t *testing.T) {
+	cases := []MetadataTestCase{
+		// valid exif key, jpeg
+		{
+			Format:                 "exif",
+			Key:                    "Exif.Photo.UserComment",
+			Value:                  "Hello, world! Привет, мир!",
+			ImageFilename:          "testdata/pixel.jpg",
+			ExpectedErrorSubstring: "", // no error
+		},
+		// valid exif key, webp
+		{
+			Format:                 "exif",
+			Key:                    "Exif.Photo.UserComment",
+			Value:                  "Hello, world! Привет, мир!",
+			ImageFilename:          "testdata/pixel.webp",
+			ExpectedErrorSubstring: "",
+		},
+		// valid iptc key, jpeg.
+		// webp iptc is not supported (see libexiv2/src/webpimage.cpp WebPImage::setIptcData))
+		{
+			Format:                 "iptc",
+			Key:                    "Iptc.Application2.Caption",
+			Value:                  "Hello, world! Привет, мир!",
+			ImageFilename:          "testdata/pixel.jpg",
+			ExpectedErrorSubstring: "",
+		},
+		// invalid exif key, jpeg
+		{
+			Format:                 "exif",
+			Key:                    "Exif.Invalid.Key",
+			Value:                  "this value should not be written",
+			ImageFilename:          "testdata/pixel.jpg",
+			ExpectedErrorSubstring: "Invalid key",
+		},
+		// invalid exif key, webp
+		{
+			Format:                 "exif",
+			Key:                    "Exif.Invalid.Key",
+			Value:                  "this value should not be written",
+			ImageFilename:          "testdata/pixel.webp",
+			ExpectedErrorSubstring: "Invalid key",
+		},
+		// invalid iptc key, jpeg
+		{
+			Format:                 "iptc",
+			Key:                    "Iptc.Invalid.Key",
+			Value:                  "this value should not be written",
+			ImageFilename:          "testdata/pixel.jpg",
+			ExpectedErrorSubstring: "Invalid record name",
+		},
+	}
+
+	var data goexiv.MetadataProvider
+
+	for i, testcase := range cases {
+		img, err := goexiv.Open(testcase.ImageFilename)
+		require.NoErrorf(t, err, "case #%d Error while opening image file", i)
+
+		err = img.SetMetadataString(testcase.Format, testcase.Key, testcase.Value)
+		if testcase.ExpectedErrorSubstring != "" {
+			require.Errorf(t, err, "case #%d Error was expected", i)
+			require.Containsf(
+				t,
+				err.Error(),
+				testcase.ExpectedErrorSubstring,
+				"case #%d Error text must contain a given substring",
+				i,
+			)
+			continue
+		} else {
+			require.NoErrorf(t, err, "case #%d Cannot write image metadata", i)
+		}
+
+		err = img.ReadMetadata()
+		require.NoErrorf(t, err, "case #%d Cannot read image metadata", i)
+
+		if testcase.Format == "iptc" {
+			data = img.GetIptcData()
+		} else {
+			data = img.GetExifData()
+		}
+
+		receivedValue, err := data.GetString(testcase.Key)
+		require.Equalf(
+			t,
+			testcase.Value,
+			receivedValue,
+			"case #%d Value written must be equal to the value read",
+			i,
+		)
+	}
+}
