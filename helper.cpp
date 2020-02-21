@@ -118,10 +118,10 @@ exiv2_image_set_exif_string(Exiv2Image *img, char *key, char *value, Exiv2Error 
 	Exiv2::ExifData exifData = img->image->exifData();
 
 	try {
-	    Exiv2::ExifKey keyObject(key);
-	    Exiv2::Value::AutoPtr valueObject = Exiv2::Value::create(Exiv2::asciiString);
-        valueObject->read(value);
-        exifData.add(keyObject, valueObject.get());
+		Exiv2::ExifKey keyObject(key);
+		Exiv2::Value::AutoPtr valueObject = Exiv2::Value::create(Exiv2::asciiString);
+		valueObject->read(value);
+		exifData.add(keyObject, valueObject.get());
 		img->image->setExifData(exifData);
 		img->image->writeMetadata();
 	} catch (Exiv2::Error &e) {
@@ -135,10 +135,11 @@ void
 exiv2_image_set_iptc_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error)
 {
 	Exiv2::IptcData iptcData = img->image->iptcData();
+
 	try {
-        Exiv2::StringValue valueObject;
+		Exiv2::StringValue valueObject;
 		valueObject.read(value);
-        iptcData[key] = valueObject;
+		iptcData[key] = valueObject;
 
 		img->image->setIptcData(iptcData);
 		img->image->writeMetadata();
