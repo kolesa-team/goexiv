@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/toaster/goexiv.svg)](https://travis-ci.org/toaster/goexiv.svg)
 
-# Go bindings for exiv2 v0.27.2 (http://www.exiv2.org)
+# Go bindings for exiv2 (http://www.exiv2.org)
 
 Those bindings are at the moment (very) incomplete, but already allow you to
 read the metadata of a file, and get the EXIF fields out of it. Binding coverage
@@ -9,7 +9,7 @@ requests :) ).
 
 ## Requirements
 
-You need to have libexiv2 installed at version 0.26 at least.
+You need to have libexiv2 installed at version 0.27 at least.
 
 ### Debian/Ubuntu
 
