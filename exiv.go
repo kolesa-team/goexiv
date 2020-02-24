@@ -25,7 +25,7 @@ type MetadataProvider interface {
 	GetString(key string) (string, error)
 }
 
-var errMetadataKeyNotFound = errors.New("key not found")
+var ErrMetadataKeyNotFound = errors.New("key not found")
 
 func (e *Error) Error() string {
 	return e.what

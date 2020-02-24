@@ -71,7 +71,7 @@ func (d *IptcData) GetString(key string) (string, error) {
 	}
 
 	if datum == nil {
-		return "", errMetadataKeyNotFound
+		return "", ErrMetadataKeyNotFound
 	}
 
 	return datum.String(), nil
