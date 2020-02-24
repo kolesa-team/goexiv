@@ -1,12 +1,11 @@
 package goexiv_test
 
 import (
-	"io/ioutil"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xapon/goexiv"
+	"io/ioutil"
+	"testing"
 )
 
 func TestOpenImage(t *testing.T) {
@@ -350,9 +349,10 @@ func Test_SetMetadataStringFromFile(t *testing.T) {
 	}
 }
 
-func Test_Bytes(t *testing.T) {
+func Test_GetBytes(t *testing.T) {
 	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
 	require.NoError(t, err)
+
 	img, err := goexiv.OpenBytes(bytes)
 	require.NoError(t, err)
 
@@ -363,14 +363,18 @@ func Test_Bytes(t *testing.T) {
 		"Image size on disk and in memory must be equal",
 	)
 
-	require.NoError(
-		t,
-		img.SetExifString("Exif.Photo.UserComment", "test"),
-	)
+	bytesBeforeTag := img.GetBytes()
+	assert.NoError(t, img.SetExifString("Exif.Photo.UserComment", "123"))
+	bytesAfterTag := img.GetBytes()
+	assert.True(t, len(bytesAfterTag) > len(bytesBeforeTag), "Image size must increase after adding an EXIF tag")
+	assert.Equal(t, &bytesBeforeTag[0], &bytesAfterTag[0], "Every call to GetBytes must point to the same underlying array")
 
-	require.True(
+	assert.NoError(t, img.SetExifString("Exif.Photo.UserComment", "123"))
+	bytesAfterTag2 := img.GetBytes()
+	assert.Equal(
 		t,
-		len(img.GetBytes()) > len(bytes),
-		"Image size in memory must increase after writing exif key",
+		len(bytesAfterTag),
+		len(bytesAfterTag2),
+		"Image size must not change after the same tag has been set",
 	)
 }

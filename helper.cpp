@@ -118,10 +118,11 @@ exiv2_image_set_exif_string(Exiv2Image *img, char *key, char *value, Exiv2Error 
 	Exiv2::ExifData exifData = img->image->exifData();
 
 	try {
-		Exiv2::ExifKey keyObject(key);
+	    Exiv2::Exifdatum& tag = exifData[key];
 		Exiv2::Value::AutoPtr valueObject = Exiv2::Value::create(Exiv2::asciiString);
 		valueObject->read(value);
-		exifData.add(keyObject, valueObject.get());
+		tag.setValue(valueObject.get());
+
 		img->image->setExifData(exifData);
 		img->image->writeMetadata();
 	} catch (Exiv2::Error &e) {
