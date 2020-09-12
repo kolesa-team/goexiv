@@ -1,6 +1,6 @@
 language: go
-go: 1.11
-go_import_path: github.com/xapon/goexiv
+go: 1.13
+go_import_path: https://github.com/kolesa-team/goexiv
 
 cache:
   apt: true
