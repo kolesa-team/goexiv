@@ -59,7 +59,7 @@ func Test_OpenBytesFailures(t *testing.T) {
 		{
 			"no image",
 			[]byte("no image"),
-			"The memory contains data of an unknown image type",
+			"Failed to read input data",
 			12,
 		},
 		{
