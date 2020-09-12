@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/toaster/goexiv.svg)](https://travis-ci.org/toaster/goexiv.svg)
+[![Build Status](https://api.travis-ci.org/kolesa-team/goexiv.svg)](https://api.travis-ci.org/kolesa-team/goexiv.svg)
 
 # Go bindings for exiv2 (http://www.exiv2.org)
 
@@ -6,7 +6,7 @@ The library allows reading and writing EXIF and IPTC metadata to/from JPG, WEBP,
 
 It is based on https://github.com/abustany/goexiv and https://github.com/gitschneider/goexiv with support added for writing the metadata and various bugfixes.
 
-Библиотека для записи и чтения метаданных EXIF и IPTC в изображениях формата JPG, WEBP, и PNG.
+Библиотека для записи и чтения метаданных EXIF и IPTC в изображениях формата JPG, WEBP и PNG.
 Основана на https://github.com/abustany/goexiv и https://github.com/gitschneider/goexiv с добавленной фукнциональностью для записи метаданных и исправлением ошибок.
 
 ## Requirements
