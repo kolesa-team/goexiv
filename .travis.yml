@@ -24,7 +24,7 @@ before_install:
     } || {
       wget http://www.exiv2.org/builds/exiv2-${EXIV2_VERSION}-Source.tar.gz
       tar xzf exiv2-${EXIV2_VERSION}-Source.tar.gz
-      mv exiv2-Source exiv2-${EXIV2_VERSION}
+      mv exiv2-${EXIV2_VERSION} exiv2-Source
       cd exiv2-${EXIV2_VERSION}
       ./configure
       make
