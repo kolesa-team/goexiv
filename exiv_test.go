@@ -60,7 +60,7 @@ func Test_OpenBytesFailures(t *testing.T) {
 			"no image",
 			[]byte("no image"),
 			"Failed to read input data",
-			12,
+			20,
 		},
 		{
 			"empty byte slice",
@@ -145,95 +145,31 @@ func TestMetadata(t *testing.T) {
 		t.Fatalf("FindKey returns a non null datum for a valid, non existing key")
 	}
 
-	// Iterate over all Exif data accessing Key() and String()
-	{
-		keyValues := map[string]string{}
-		for i := data.Iterator(); i.HasNext(); {
-			d := i.Next()
-			keyValues[d.Key()] = d.String()
-		}
-		assert.Equal(t, keyValues, map[string]string{
-			"Exif.Image.ExifTag":                 "134",
-			"Exif.Image.Make":                    "FakeMake",
-			"Exif.Image.Model":                   "FakeModel",
-			"Exif.Image.ResolutionUnit":          "2",
-			"Exif.Image.XResolution":             "72/1",
-			"Exif.Image.YCbCrPositioning":        "1",
-			"Exif.Image.YResolution":             "72/1",
-			"Exif.Photo.ColorSpace":              "65535",
-			"Exif.Photo.ComponentsConfiguration": "1 2 3 0",
-			"Exif.Photo.DateTimeDigitized":       "2013:12:08 21:06:10",
-			"Exif.Photo.ExifVersion":             "48 50 51 48",
-			"Exif.Photo.FlashpixVersion":         "48 49 48 48",
-		})
-	}
+	assert.Equal(t, map[string]string{
+		"Exif.Image.ExifTag":                 "130",
+		"Exif.Image.Make":                    "FakeMake",
+		"Exif.Image.Model":                   "FakeModel",
+		"Exif.Image.ResolutionUnit":          "2",
+		"Exif.Image.XResolution":             "72/1",
+		"Exif.Image.YCbCrPositioning":        "1",
+		"Exif.Image.YResolution":             "72/1",
+		"Exif.Photo.ColorSpace":              "65535",
+		"Exif.Photo.ComponentsConfiguration": "1 2 3 0",
+		"Exif.Photo.DateTimeDigitized":       "2013:12:08 21:06:10",
+		"Exif.Photo.ExifVersion":             "48 50 51 48",
+		"Exif.Photo.FlashpixVersion":         "48 49 48 48",
+	}, data.AllTags())
 
 	//
 	// IPTC
 	//
 	iptcData := img.GetIptcData()
-
-	// Iterate over all IPCT data accessing Key() and String()
-	{
-		keyValues := map[string]string{}
-		for i := iptcData.Iterator(); i.HasNext(); {
-			d := i.Next()
-			keyValues[d.Key()] = d.String()
-		}
-		assert.Equal(t, keyValues, map[string]string{
-			"Iptc.Application2.Copyright":   "this is the copy, right?",
-			"Iptc.Application2.CountryName": "Lancre",
-			"Iptc.Application2.DateCreated": "1848-10-13",
-			"Iptc.Application2.TimeCreated": "12:49:32+01:00",
-		})
-	}
-
-	//
-	// ICC profile
-	//
-	iccProfile := img.ICCProfile()
-	assert.Equal(t,
-		// 128 bytes header
-		"\x00\x00\x02\x30"+
-			"ADBE\x02\x10\x00\x00"+
-			"mntrRGB XYZ \x07\xcf\x00\x06\x00\x03\x00\x00\x00\x00\x00\x00"+
-			"acspAPPL\x00\x00\x00\x00"+
-			"none\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"\x00\x00\xf6\xd6\x00\x01\x00\x00\x00\x00\xd3-"+
-			"ADBE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"\x00\x00\x00\x00\x00\x00"+
-			// tag table (124 bytes)
-			// tag count (10)
-			"\x00\x00\x00\x0a"+
-			// tag references (4 bytes signature, 4 bytes position from start of profile, 4 bytes length)
-			"cprt\x00\x00\x00\xfc\x00\x00\x00\x32"+
-			"desc\x00\x00\x01\x30\x00\x00\x00k"+
-			"wtpt\x00\x00\x01\x9c\x00\x00\x00\x14"+
-			"bkpt\x00\x00\x01\xb0\x00\x00\x00\x14"+
-			"rTRC\x00\x00\x01\xc4\x00\x00\x00\x0e"+
-			"gTRC\x00\x00\x01\xd4\x00\x00\x00\x0e"+
-			"bTRC\x00\x00\x01\xe4\x00\x00\x00\x0e"+
-			"rXYZ\x00\x00\x01\xf4\x00\x00\x00\x14"+
-			"gXYZ\x00\x00\x02\b\x00\x00\x00\x14"+
-			"bXYZ\x00\x00\x02\x1c\x00\x00\x00\x14"+
-			// tagged element data (308 bytes; sum of the length of the ten tags)
-			"text\x00\x00\x00\x00Copyright 1999 Adobe Systems Incorporated\x00\x00\x00"+
-			"desc\x00\x00\x00\x00\x00\x00\x00\x11Adobe RGB (1998)"+
-			"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"XYZ \x00\x00\x00\x00\x00\x00\xf3Q\x00\x01\x00\x00\x00\x01\x16\xcc"+
-			"XYZ \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"+
-			"curv\x00\x00\x00\x00\x00\x00\x00\x01\x023\x00\x00"+
-			"curv\x00\x00\x00\x00\x00\x00\x00\x01\x023\x00\x00"+
-			"curv\x00\x00\x00\x00\x00\x00\x00\x01\x023\x00\x00"+
-			"XYZ \x00\x00\x00\x00\x00\x00\x9c\x18\x00\x00O\xa5\x00\x00\x04\xfc"+
-			"XYZ \x00\x00\x00\x00\x00\x004\x8d\x00\x00\xa0,\x00\x00\x0f\x95"+
-			"XYZ \x00\x00\x00\x00\x00\x00&1\x00\x00\x10/\x00\x00\xbe\x9c",
-		string(iccProfile),
-	)
+	assert.Equal(t, map[string]string{
+		"Iptc.Application2.Copyright":   "this is the copy, right?",
+		"Iptc.Application2.CountryName": "Lancre",
+		"Iptc.Application2.DateCreated": "2012-10-13",
+		"Iptc.Application2.TimeCreated": "12:49:32+01:00",
+	}, iptcData.AllTags())
 }
 
 func TestNoMetadata(t *testing.T) {
@@ -241,9 +177,6 @@ func TestNoMetadata(t *testing.T) {
 	require.NoError(t, err)
 	err = img.ReadMetadata()
 	require.NoError(t, err)
-
-	// no ICC profile
-
 	assert.Nil(t, img.ICCProfile())
 }
 

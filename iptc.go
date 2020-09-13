@@ -106,6 +106,17 @@ func (d *IptcDatum) String() string {
 	return C.GoString(cstr)
 }
 
+// Returns all IPTC tags
+func (d *IptcData) AllTags() map[string]string {
+	keyValues := map[string]string{}
+	for i := d.Iterator(); i.HasNext(); {
+		d := i.Next()
+		keyValues[d.Key()] = d.String()
+	}
+
+	return keyValues
+}
+
 // Iterator returns a new IptcDatumIterator to iterate over all IPTC data.
 func (d *IptcData) Iterator() *IptcDatumIterator {
 	return makeIptcDatumIterator(d, C.exiv2_iptc_data_iterator(d.data))

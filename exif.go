@@ -106,6 +106,17 @@ func (d *ExifDatum) String() string {
 	return C.GoString(cstr)
 }
 
+// Returns all EXIF tags
+func (d *ExifData) AllTags() map[string]string {
+	keyValues := map[string]string{}
+	for i := d.Iterator(); i.HasNext(); {
+		d := i.Next()
+		keyValues[d.Key()] = d.String()
+	}
+
+	return keyValues
+}
+
 // Iterator returns a new ExifDatumIterator to iterate over all Exif data.
 func (d *ExifData) Iterator() *ExifDatumIterator {
 	return makeExifDatumIterator(d, C.exiv2_exif_data_iterator(d.data))

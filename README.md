@@ -11,7 +11,7 @@ It is based on https://github.com/abustany/goexiv and https://github.com/gitschn
 
 ## Requirements
 
-A [libexiv2](http://www.exiv2.org) library v0.27 is required (this might also work with never versions, but it hasn't been tested).
+A [libexiv2](http://www.exiv2.org) library v0.27 is required (this might also work with newer versions, but it hasn't been tested).
 
 On Ubuntu, libexiv2 can be installed from the package manager (`sudo apt install libexiv2-dev`), but there is no guarantee it comes with the version needed.
 So it is safer to install it manually:
@@ -23,12 +23,9 @@ So it is safer to install it manually:
     cmake .. -DCMAKE_BUILD_TYPE=Release
     cmake --build .
     sudo make install
+    sudo ldconfig
     ```
-* Create a file `/etc/ld.so.conf.d/libexiv.conf` with the following contents:
-    ```
-    /usr/local/lib/libexiv2
-    ```
-* Run `sudo ldconfig`
+* It may be needed to set the following variable: `export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig`
 
 Now the Go code in this project can interface with the libexiv2 library.
 
@@ -87,6 +84,17 @@ if err != nil {
 
 // Get back the modified image, so it can now be further processed (e.g. sent over the network)
 img = goexivImg.GetBytes()
+```
+
+Retrieving all metadata keys and values:
+
+```
+img.ReadMetadata()
+// map[string]string
+exif := img.GetExifData().AllTags()
+
+// map[string]string
+iptc := img.GetIptcData().AllTags()
 ```
 
 A complete image processing workflow in Go can be organized with the following additional libraries:

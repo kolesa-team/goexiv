@@ -295,7 +295,7 @@ DEFINE_FREE_FUNCTION(exiv2_iptc_data, Exiv2IptcData*);
 
 const char* exiv2_iptc_datum_key(const Exiv2IptcDatum *datum)
 {
-	return datum->datum.key().c_str();
+	return strdup(datum->datum.key().c_str());
 }
 
 const char* exiv2_iptc_datum_to_string(const Exiv2IptcDatum *datum)
@@ -365,7 +365,7 @@ DEFINE_FREE_FUNCTION(exiv2_exif_data, Exiv2ExifData*);
 
 const char* exiv2_exif_datum_key(const Exiv2ExifDatum *datum)
 {
-	return datum->datum.key().c_str();
+	return strdup(datum->datum.key().c_str());
 }
 
 const char* exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum)
