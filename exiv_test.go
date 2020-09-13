@@ -89,6 +89,7 @@ func Test_OpenBytesFailures(t *testing.T) {
 }
 
 func TestMetadata(t *testing.T) {
+	initializeImage("testdata/pixel.jpg", t)
 	img, err := goexiv.Open("testdata/pixel.jpg")
 	require.NoError(t, err)
 
@@ -310,4 +311,34 @@ func Test_GetBytes(t *testing.T) {
 		len(bytesAfterTag2),
 		"Image size must not change after the same tag has been set",
 	)
+}
+
+// Fills the image with metadata
+func initializeImage(path string, t *testing.T) {
+	img, err := goexiv.Open(path)
+	require.NoError(t, err)
+
+	img.SetIptcString("Iptc.Application2.Copyright", "this is the copy, right?")
+	img.SetIptcString("Iptc.Application2.CountryName", "Lancre")
+	img.SetIptcString("Iptc.Application2.DateCreated", "20121013")
+	img.SetIptcString("Iptc.Application2.TimeCreated", "124932:0100")
+
+	exifTags := map[string]string{
+		"Exif.Image.Make":                    "FakeMake",
+		"Exif.Image.Model":                   "FakeModel",
+		"Exif.Image.ResolutionUnit":          "2",
+		"Exif.Image.XResolution":             "72/1",
+		"Exif.Image.YCbCrPositioning":        "1",
+		"Exif.Image.YResolution":             "72/1",
+		"Exif.Photo.ColorSpace":              "65535",
+		"Exif.Photo.ComponentsConfiguration": "1 2 3 0",
+		"Exif.Photo.DateTimeDigitized":       "2013:12:08 21:06:10",
+		"Exif.Photo.ExifVersion":             "48 50 51 48",
+		"Exif.Photo.FlashpixVersion":         "48 49 48 48",
+	}
+
+	for k, v := range exifTags {
+		err = img.SetExifString(k, v)
+		require.NoError(t, err, k, v)
+	}
 }
