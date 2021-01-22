@@ -120,7 +120,10 @@ func (i *Image) GetBytes() []byte {
 	header.Len = size
 	header.Data = uintptr(unsafe.Pointer(ptr))
 
-	return slice
+	target := make([]byte, len(slice))
+	copy(target, slice)
+
+	return target
 }
 
 // PixelWidth returns the width of the image in pixels
