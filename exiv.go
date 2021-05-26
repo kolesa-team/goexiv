@@ -175,3 +175,34 @@ func (i *Image) SetMetadataString(format, key, value string) error {
 
 	return nil
 }
+
+// Sets an exif or iptc key with a given short value
+func (i *Image) SetMetadataShort(format, key, value string) error {
+	if format != "iptc" && format != "exif" {
+		return errors.New("invalid metadata type: " + format)
+	}
+
+	cKey := C.CString(key)
+	cValue := C.CString(value)
+
+	defer func() {
+		C.free(unsafe.Pointer(cKey))
+		C.free(unsafe.Pointer(cValue))
+	}()
+
+	var cerr *C.Exiv2Error
+
+	if format == "iptc" {
+		C.exiv2_image_set_iptc_short(i.img, cKey, cValue, &cerr)
+	} else {
+		C.exiv2_image_set_exif_short(i.img, cKey, cValue, &cerr)
+	}
+
+	if cerr != nil {
+		err := makeError(cerr)
+		C.exiv2_error_free(cerr)
+		return err
+	}
+
+	return nil
+}
