@@ -51,6 +51,12 @@ if err != nil {
     return err
 }
 
+// Write an EXIF short integer
+err = goexivImg.SetMetadataShort("exif", "Exif.Photo.ExposureProgram", "2")
+if err != nil {
+    return err
+}
+
 // Read metadata
 err = goexivImg.ReadMetadata()
 if err != nil {

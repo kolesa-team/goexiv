@@ -133,6 +133,26 @@ exiv2_image_set_exif_string(Exiv2Image *img, char *key, char *value, Exiv2Error 
 }
 
 void
+exiv2_image_set_exif_short(Exiv2Image *img, char *key, char *value, Exiv2Error **error)
+{
+	Exiv2::ExifData exifData = img->image->exifData();
+
+	try {
+		Exiv2::Exifdatum& tag = exifData[key];
+		Exiv2::Value::AutoPtr valueObject = Exiv2::Value::create(Exiv2::unsignedShort);
+		valueObject->read(value);
+		tag.setValue(valueObject.get());
+
+		img->image->setExifData(exifData);
+		img->image->writeMetadata();
+	} catch (Exiv2::Error &e) {
+		if (error) {
+			*error = new Exiv2Error(e);
+		}
+	}
+}
+
+void
 exiv2_image_set_iptc_string(Exiv2Image *img, char *key, char *value, Exiv2Error **error)
 {
 	Exiv2::IptcData iptcData = img->image->iptcData();
@@ -149,6 +169,26 @@ exiv2_image_set_iptc_string(Exiv2Image *img, char *key, char *value, Exiv2Error 
 			*error = new Exiv2Error(e);
 		}
 	}
+}
+
+void
+exiv2_image_set_iptc_short(Exiv2Image *img, char *key, char *value, Exiv2Error **error)
+{
+    Exiv2::IptcData iptcData = img->image->iptcData();
+
+    try {
+        Exiv2::Iptcdatum& tag = iptcData[key];
+        Exiv2::Value::AutoPtr valueObject = Exiv2::Value::create(Exiv2::unsignedShort);
+        valueObject->read(value);
+        tag.setValue(valueObject.get());
+
+        img->image->setIptcData(iptcData);
+        img->image->writeMetadata();
+    } catch (Exiv2::Error &e) {
+        if (error) {
+            *error = new Exiv2Error(e);
+        }
+    }
 }
 
 long

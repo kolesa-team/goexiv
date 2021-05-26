@@ -189,7 +189,7 @@ type MetadataTestCase struct {
 	ExpectedErrorSubstring string
 }
 
-var metadataTestCases = []MetadataTestCase{
+var metadataSetStringTestCases = []MetadataTestCase{
 	// valid exif key, jpeg
 	{
 		Format:                 "exif",
@@ -244,11 +244,105 @@ var metadataTestCases = []MetadataTestCase{
 func Test_SetMetadataStringFromFile(t *testing.T) {
 	var data goexiv.MetadataProvider
 
-	for i, testcase := range metadataTestCases {
+	for i, testcase := range metadataSetStringTestCases {
 		img, err := goexiv.Open(testcase.ImageFilename)
 		require.NoErrorf(t, err, "case #%d Error while opening image file", i)
 
 		err = img.SetMetadataString(testcase.Format, testcase.Key, testcase.Value)
+		if testcase.ExpectedErrorSubstring != "" {
+			require.Errorf(t, err, "case #%d Error was expected", i)
+			require.Containsf(
+				t,
+				err.Error(),
+				testcase.ExpectedErrorSubstring,
+				"case #%d Error text must contain a given substring",
+				i,
+			)
+			continue
+		}
+
+		require.NoErrorf(t, err, "case #%d Cannot write image metadata", i)
+
+		err = img.ReadMetadata()
+		require.NoErrorf(t, err, "case #%d Cannot read image metadata", i)
+
+		if testcase.Format == "iptc" {
+			data = img.GetIptcData()
+		} else {
+			data = img.GetExifData()
+		}
+
+		receivedValue, err := data.GetString(testcase.Key)
+		require.Equalf(
+			t,
+			testcase.Value,
+			receivedValue,
+			"case #%d Value written must be equal to the value read",
+			i,
+		)
+	}
+}
+
+var metadataSetShortIntTestCases = []MetadataTestCase{
+	// valid exif key, jpeg
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Photo.ExposureProgram",
+		Value:                  "1",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "", // no error
+	},
+	// valid exif key, webp
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Photo.ExposureProgram",
+		Value:                  "2",
+		ImageFilename:          "testdata/pixel.webp",
+		ExpectedErrorSubstring: "",
+	},
+	// valid iptc key, jpeg.
+	// webp iptc is not supported (see libexiv2/src/webpimage.cpp WebPImage::setIptcData))
+	{
+		Format:                 "iptc",
+		Key:                    "Iptc.Envelope.ModelVersion",
+		Value:                  "3",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "",
+	},
+	// invalid exif key, jpeg
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Invalid.Key",
+		Value:                  "4",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "Invalid key",
+	},
+	// invalid exif key, webp
+	{
+		Format:                 "exif",
+		Key:                    "Exif.Invalid.Key",
+		Value:                  "5",
+		ImageFilename:          "testdata/pixel.webp",
+		ExpectedErrorSubstring: "Invalid key",
+	},
+	// invalid iptc key, jpeg
+	{
+		Format:                 "iptc",
+		Key:                    "Iptc.Invalid.Key",
+		Value:                  "6",
+		ImageFilename:          "testdata/pixel.jpg",
+		ExpectedErrorSubstring: "Invalid record name",
+	},
+}
+
+func Test_SetMetadataShortInt(t *testing.T) {
+	var data goexiv.MetadataProvider
+
+	for i, testcase := range metadataSetShortIntTestCases {
+		img, err := goexiv.Open(testcase.ImageFilename)
+		require.NoErrorf(t, err, "case #%d Error while opening image file", i)
+
+		err = img.SetMetadataShort(testcase.Format, testcase.Key, testcase.Value)
 		if testcase.ExpectedErrorSubstring != "" {
 			require.Errorf(t, err, "case #%d Error was expected", i)
 			require.Containsf(
