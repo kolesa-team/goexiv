@@ -1,5 +1,5 @@
 language: go
-go: 1.13
+go: 1.18
 go_import_path: https://github.com/kolesa-team/goexiv
 
 cache:
@@ -22,7 +22,7 @@ before_install:
     test -d exiv2-${EXIV2_VERSION} && {
       cd exiv2-${EXIV2_VERSION}/build
     } || {
-      wget http://www.exiv2.org/builds/exiv2-${EXIV2_VERSION}-Source.tar.gz
+      wget https://github.com/Exiv2/exiv2/releases/download/v${EXIV2_VERSION}/exiv2-${EXIV2_VERSION}-Source.tar.gz
       tar xzf exiv2-${EXIV2_VERSION}-Source.tar.gz
       mv exiv2-${EXIV2_VERSION}-Source exiv2-${EXIV2_VERSION}
       cd exiv2-${EXIV2_VERSION}
