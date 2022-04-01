@@ -119,7 +119,9 @@ func (i *Image) GetBytes() []byte {
 		panic(fmt.Sprintf("invalid image size: %d", size))
 	}
 
-	if ptr < 1 {
+	dataPtr := uintptr(unsafe.Pointer(ptr))
+
+	if dataPtr < 1 {
 		panic(fmt.Sprintf("invalid image pointer: %v", ptr))
 	}
 
