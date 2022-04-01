@@ -7,6 +7,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"runtime"
 	"unsafe"
@@ -114,13 +115,21 @@ func (i *Image) GetBytes() []byte {
 	size := int(C.exiv_image_get_size(i.img))
 	ptr := C.exiv_image_get_bytes_ptr(i.img)
 
+	if size < 1 {
+		panic(fmt.Sprintf("invalid image size: %d", size))
+	}
+
+	if ptr < 1 {
+		panic(fmt.Sprintf("invalid image pointer: %v", ptr))
+	}
+
 	var slice []byte
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
 	header.Cap = size
 	header.Len = size
 	header.Data = uintptr(unsafe.Pointer(ptr))
 
-	target := make([]byte, len(slice))
+	target := make([]byte, size)
 	copy(target, slice)
 
 	return target
