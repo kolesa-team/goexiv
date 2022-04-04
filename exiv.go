@@ -7,8 +7,6 @@ import "C"
 
 import (
 	"errors"
-	"fmt"
-	"reflect"
 	"runtime"
 	"unsafe"
 )
@@ -19,7 +17,8 @@ type Error struct {
 }
 
 type Image struct {
-	img *C.Exiv2Image
+	bytesArrayPtr unsafe.Pointer
+	img           *C.Exiv2Image
 }
 
 type MetadataProvider interface {
@@ -43,13 +42,18 @@ func makeError(cerr *C.Exiv2Error) *Error {
 	}
 }
 
-func makeImage(cimg *C.Exiv2Image) *Image {
+func makeImage(cimg *C.Exiv2Image, bytesPtr unsafe.Pointer) *Image {
 	img := &Image{
-		cimg,
+		bytesArrayPtr: bytesPtr,
+		img:           cimg,
 	}
 
 	runtime.SetFinalizer(img, func(x *Image) {
 		C.exiv2_image_free(x.img)
+
+		if x.bytesArrayPtr != nil {
+			C.free(x.bytesArrayPtr)
+		}
 	})
 
 	return img
@@ -72,18 +76,25 @@ func Open(path string) (*Image, error) {
 		return nil, err
 	}
 
-	return makeImage(cimg), nil
+	return makeImage(cimg, nil), nil
 }
 
 // OpenBytes opens a byte slice with image data and returns a pointer to
 // the corresponding Image object, but does not read the Metadata.
 // Start the parsing with a call to ReadMetadata()
-func OpenBytes(b []byte) (*Image, error) {
-	if len(b) == 0 {
+func OpenBytes(input []byte) (*Image, error) {
+	if len(input) == 0 {
 		return nil, &Error{0, "input is empty"}
 	}
+
 	var cerr *C.Exiv2Error
-	cimg := C.exiv2_image_factory_open_bytes((*C.uchar)(unsafe.Pointer(&b[0])), C.long(len(b)), &cerr)
+
+	bytesArrayPtr := C.CBytes(input)
+	cimg := C.exiv2_image_factory_open_bytes(
+		(*C.uchar)(bytesArrayPtr),
+		C.long(len(input)),
+		&cerr,
+	)
 
 	if cerr != nil {
 		err := makeError(cerr)
@@ -91,7 +102,7 @@ func OpenBytes(b []byte) (*Image, error) {
 		return nil, err
 	}
 
-	return makeImage(cimg), nil
+	return makeImage(cimg, bytesArrayPtr), nil
 }
 
 // ReadMetadata reads the metadata of an Image
@@ -112,29 +123,10 @@ func (i *Image) ReadMetadata() error {
 // Returns an image contents.
 // If its metadata has been changed, the changes are reflected here.
 func (i *Image) GetBytes() []byte {
-	size := int(C.exiv_image_get_size(i.img))
+	size := C.exiv_image_get_size(i.img)
 	ptr := C.exiv_image_get_bytes_ptr(i.img)
 
-	if size < 1 {
-		panic(fmt.Sprintf("invalid image size: %d", size))
-	}
-
-	dataPtr := uintptr(unsafe.Pointer(ptr))
-
-	if dataPtr < 1 {
-		panic(fmt.Sprintf("invalid image pointer: %v", ptr))
-	}
-
-	var slice []byte
-	header := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
-	header.Cap = size
-	header.Len = size
-	header.Data = uintptr(unsafe.Pointer(ptr))
-
-	target := make([]byte, size)
-	copy(target, slice)
-
-	return target
+	return C.GoBytes(unsafe.Pointer(ptr), C.int(size))
 }
 
 // PixelWidth returns the width of the image in pixels

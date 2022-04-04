@@ -5,6 +5,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
+	"runtime"
+	"sync"
 	"testing"
 )
 
@@ -405,6 +407,44 @@ func Test_GetBytes(t *testing.T) {
 		len(bytesAfterTag2),
 		"Image size must not change after the same tag has been set",
 	)
+}
+
+// Ensures image manipulation doesn't fail when running from multiple goroutines
+func Test_GetBytes_Goroutine(t *testing.T) {
+	var wg sync.WaitGroup
+	iterations := 0
+
+	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
+	require.NoError(t, err)
+
+	for i := 0; i < 100; i++ {
+		iterations++
+		wg.Add(1)
+
+		go func(i int) {
+			defer wg.Done()
+
+			img, err := goexiv.OpenBytes(bytes)
+			require.NoError(t, err)
+
+			// trigger garbage collection to increase the chance that underlying img.img will be collected
+			runtime.GC()
+
+			bytesAfter := img.GetBytes()
+			assert.NotEmpty(t, bytesAfter)
+
+			// if this line is removed, then the test will likely fail
+			// with segmentation violation.
+			// so far we couldn't come up with a better solution.
+			runtime.KeepAlive(img)
+		}(i)
+	}
+
+	wg.Wait()
+	runtime.GC()
+	var memStats runtime.MemStats
+	runtime.ReadMemStats(&memStats)
+	t.Logf("Allocated bytes after test:  %+v\n", memStats.HeapAlloc)
 }
 
 // Fills the image with metadata
