@@ -447,6 +447,52 @@ func Test_GetBytes_Goroutine(t *testing.T) {
 	t.Logf("Allocated bytes after test:  %+v\n", memStats.HeapAlloc)
 }
 
+func BenchmarkImage_GetBytes_KeepAlive(b *testing.B) {
+	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
+	require.NoError(b, err)
+	var wg sync.WaitGroup
+
+	for i := 0; i < b.N; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			img, err := goexiv.OpenBytes(bytes)
+			require.NoError(b, err)
+
+			runtime.GC()
+
+			require.NoError(b, img.SetExifString("Exif.Photo.UserComment", "123"))
+
+			bytesAfter := img.GetBytes()
+			assert.NotEmpty(b, bytesAfter)
+			runtime.KeepAlive(img)
+		}()
+	}
+
+	wg.Wait()
+}
+
+func BenchmarkImage_GetBytes_NoKeepAlive(b *testing.B) {
+	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
+	require.NoError(b, err)
+	var wg sync.WaitGroup
+
+	for i := 0; i < b.N; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			img, err := goexiv.OpenBytes(bytes)
+			require.NoError(b, err)
+
+			require.NoError(b, img.SetExifString("Exif.Photo.UserComment", "123"))
+
+			bytesAfter := img.GetBytes()
+			assert.NotEmpty(b, bytesAfter)
+		}()
+	}
+}
+
 // Fills the image with metadata
 func initializeImage(path string, t *testing.T) {
 	img, err := goexiv.Open(path)
