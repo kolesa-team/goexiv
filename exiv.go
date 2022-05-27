@@ -105,6 +105,21 @@ func OpenBytes(input []byte) (*Image, error) {
 	return makeImage(cimg, bytesArrayPtr), nil
 }
 
+type LogMsgLevel int
+
+const (
+	LogMsgDebug LogMsgLevel = 0
+	LogMsgInfo              = 1
+	LogMsgWarn              = 2
+	LogMsgError             = 3
+	LogMsgMute              = 4
+)
+
+// SetLogMsgLevel Set the log level (outputs to stderr)
+func SetLogMsgLevel(level LogMsgLevel) {
+	C.exiv2_log_msg_set_level(C.int(level))
+}
+
 // ReadMetadata reads the metadata of an Image
 func (i *Image) ReadMetadata() error {
 	var cerr *C.Exiv2Error
