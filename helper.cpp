@@ -416,6 +416,15 @@ const char* exiv2_exif_datum_to_string(const Exiv2ExifDatum *datum)
 
 DEFINE_FREE_FUNCTION(exiv2_exif_datum, Exiv2ExifDatum*);
 
+// LOG LEVEL
+
+void
+exiv2_log_msg_set_level(const int level)
+{
+    Exiv2::LogMsg::Level cpplevel = static_cast<Exiv2::LogMsg::Level>(level);
+    Exiv2::LogMsg::setLevel(cpplevel);
+}
+
 // ERRORS
 
 int
