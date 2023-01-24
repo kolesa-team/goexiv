@@ -72,9 +72,6 @@ func OpenBytes(input []byte) (*Image, error) {
 
 	var cerr *C.Exiv2Error
 
-	//inputCopy := make([]byte, len(input))
-	//copy(inputCopy, input)
-
 	bytesArrayPtr := C.CBytes(input)
 	cimg := C.exiv2_image_factory_open_bytes(
 		(*C.uchar)(bytesArrayPtr),
