@@ -72,9 +72,8 @@ if err != nil {
 fmt.Println(userComment)
 // "A comment. Might be a JSON string. Можно писать и по-русски!"
 
-// It is advisable to insert this line at the end of `goexivImg` lifecycle.  
-// see exiv_test.go:Test_GetBytes_Goroutine
-runtime.KeepAlive(goexivImg)
+// Release resources associated with the image
+goexivImg.Close()
 ```
 
 Changing the image metadata in memory and returning the updated image (an approach fit for a web service):

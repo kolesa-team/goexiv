@@ -7,7 +7,6 @@ import "C"
 
 import (
 	"errors"
-	"runtime"
 	"unsafe"
 )
 
@@ -17,8 +16,7 @@ type Error struct {
 }
 
 type Image struct {
-	bytesArrayPtr unsafe.Pointer
-	img           *C.Exiv2Image
+	img *C.Exiv2Image
 }
 
 type MetadataProvider interface {
@@ -42,23 +40,6 @@ func makeError(cerr *C.Exiv2Error) *Error {
 	}
 }
 
-func makeImage(cimg *C.Exiv2Image, bytesPtr unsafe.Pointer) *Image {
-	img := &Image{
-		bytesArrayPtr: bytesPtr,
-		img:           cimg,
-	}
-
-	runtime.SetFinalizer(img, func(x *Image) {
-		C.exiv2_image_free(x.img)
-
-		if x.bytesArrayPtr != nil {
-			C.free(x.bytesArrayPtr)
-		}
-	})
-
-	return img
-}
-
 // Open opens an image file from the filesystem and returns a pointer to
 // the corresponding Image object, but does not read the Metadata.
 // Start the parsing with a call to ReadMetadata()
@@ -76,7 +57,9 @@ func Open(path string) (*Image, error) {
 		return nil, err
 	}
 
-	return makeImage(cimg, nil), nil
+	return &Image{
+		img: cimg,
+	}, nil
 }
 
 // OpenBytes opens a byte slice with image data and returns a pointer to
@@ -88,6 +71,9 @@ func OpenBytes(input []byte) (*Image, error) {
 	}
 
 	var cerr *C.Exiv2Error
+
+	//inputCopy := make([]byte, len(input))
+	//copy(inputCopy, input)
 
 	bytesArrayPtr := C.CBytes(input)
 	cimg := C.exiv2_image_factory_open_bytes(
@@ -102,7 +88,9 @@ func OpenBytes(input []byte) (*Image, error) {
 		return nil, err
 	}
 
-	return makeImage(cimg, bytesArrayPtr), nil
+	return &Image{
+		img: cimg,
+	}, nil
 }
 
 type LogMsgLevel int
@@ -223,4 +211,9 @@ func (i *Image) SetMetadataShort(format, key, value string) error {
 	}
 
 	return nil
+}
+
+// Close Releases resources associated with the image
+func (i *Image) Close() {
+	C.exiv2_image_free(i.img)
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/kolesa-team/goexiv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
+	"os"
 	"runtime"
 	"sync"
 	"testing"
@@ -42,7 +42,7 @@ func TestOpenImage(t *testing.T) {
 }
 
 func Test_OpenBytes(t *testing.T) {
-	bytes, err := ioutil.ReadFile("testdata/pixel.jpg")
+	bytes, err := os.ReadFile("testdata/pixel.jpg")
 	require.NoError(t, err)
 
 	img, err := goexiv.OpenBytes(bytes)
@@ -380,7 +380,7 @@ func Test_SetMetadataShortInt(t *testing.T) {
 }
 
 func Test_GetBytes(t *testing.T) {
-	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
+	bytes, err := os.ReadFile("testdata/stripped_pixel.jpg")
 	require.NoError(t, err)
 
 	img, err := goexiv.OpenBytes(bytes)
@@ -414,14 +414,14 @@ func Test_GetBytes_Goroutine(t *testing.T) {
 	var wg sync.WaitGroup
 	iterations := 0
 
-	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
-	require.NoError(t, err)
-
 	for i := 0; i < 100; i++ {
 		iterations++
 		wg.Add(1)
 
 		go func(i int) {
+
+			bytes, err := os.ReadFile("testdata/large.jpg")
+			require.NoError(t, err)
 			defer wg.Done()
 
 			img, err := goexiv.OpenBytes(bytes)
@@ -433,10 +433,7 @@ func Test_GetBytes_Goroutine(t *testing.T) {
 			bytesAfter := img.GetBytes()
 			assert.NotEmpty(t, bytesAfter)
 
-			// if this line is removed, then the test will likely fail
-			// with segmentation violation.
-			// so far we couldn't come up with a better solution.
-			runtime.KeepAlive(img)
+			img.Close()
 		}(i)
 	}
 
@@ -444,11 +441,11 @@ func Test_GetBytes_Goroutine(t *testing.T) {
 	runtime.GC()
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	t.Logf("Allocated bytes after test:  %+v\n", memStats.HeapAlloc)
+	t.Logf("Allocated bytes after test:  %+v (%d kb), mallocs: %d\n", memStats.HeapAlloc, memStats.HeapAlloc/1024, memStats.Mallocs)
 }
 
-func BenchmarkImage_GetBytes_KeepAlive(b *testing.B) {
-	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
+func BenchmarkImage_GetBytes_Large(b *testing.B) {
+	bytes, err := os.ReadFile("testdata/large.jpg")
 	require.NoError(b, err)
 	var wg sync.WaitGroup
 
@@ -466,15 +463,15 @@ func BenchmarkImage_GetBytes_KeepAlive(b *testing.B) {
 
 			bytesAfter := img.GetBytes()
 			assert.NotEmpty(b, bytesAfter)
-			runtime.KeepAlive(img)
+			img.Close()
 		}()
 	}
 
 	wg.Wait()
 }
 
-func BenchmarkImage_GetBytes_NoKeepAlive(b *testing.B) {
-	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
+func BenchmarkImage_OpenBytes(b *testing.B) {
+	bytes, err := os.ReadFile("testdata/large.jpg")
 	require.NoError(b, err)
 	var wg sync.WaitGroup
 
@@ -482,15 +479,19 @@ func BenchmarkImage_GetBytes_NoKeepAlive(b *testing.B) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+
 			img, err := goexiv.OpenBytes(bytes)
 			require.NoError(b, err)
 
-			require.NoError(b, img.SetExifString("Exif.Photo.UserComment", "123"))
+			runtime.GC()
 
-			bytesAfter := img.GetBytes()
-			assert.NotEmpty(b, bytesAfter)
+			_, _ = img.GetExifData().GetString("Exif.Photo.UserComment")
+
+			img.Close()
 		}()
 	}
+
+	wg.Wait()
 }
 
 // Fills the image with metadata
