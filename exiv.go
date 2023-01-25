@@ -16,7 +16,8 @@ type Error struct {
 }
 
 type Image struct {
-	img *C.Exiv2Image
+	img           *C.Exiv2Image
+	bytesArrayPtr unsafe.Pointer
 }
 
 type MetadataProvider interface {
@@ -85,9 +86,12 @@ func OpenBytes(input []byte) (*Image, error) {
 		return nil, err
 	}
 
-	return &Image{
-		img: cimg,
-	}, nil
+	img := &Image{
+		bytesArrayPtr: bytesArrayPtr,
+		img:           cimg,
+	}
+
+	return img, nil
 }
 
 type LogMsgLevel int
@@ -213,4 +217,8 @@ func (i *Image) SetMetadataShort(format, key, value string) error {
 // Close Releases resources associated with the image
 func (i *Image) Close() {
 	C.exiv2_image_free(i.img)
+
+	if i.bytesArrayPtr != nil {
+		C.free(i.bytesArrayPtr)
+	}
 }

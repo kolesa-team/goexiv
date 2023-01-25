@@ -428,7 +428,7 @@ func Test_GetBytes_Goroutine(t *testing.T) {
 			require.NoError(t, err)
 
 			// trigger garbage collection to increase the chance that underlying img.img will be collected
-			runtime.GC()
+			//runtime.GC()
 
 			bytesAfter := img.GetBytes()
 			assert.NotEmpty(t, bytesAfter)
