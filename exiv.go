@@ -25,6 +25,14 @@ type MetadataProvider interface {
 	GetString(key string) (string, error)
 }
 
+type MetadataFormat int
+
+const (
+	EXIF MetadataFormat = iota
+	IPTC
+	XMP
+)
+
 var ErrMetadataKeyNotFound = errors.New("key not found")
 
 func (e *Error) Error() string {
@@ -219,6 +227,32 @@ func (i *Image) SetMetadataShort(format, key, value string) error {
 	if cerr != nil {
 		err := makeError(cerr)
 		C.exiv2_error_free(cerr)
+		return err
+	}
+
+	return nil
+}
+
+func (i *Image) StripKey(f MetadataFormat, key string) error {
+	ckey := C.CString(key)
+	defer C.free(unsafe.Pointer(ckey))
+
+	var cErr *C.Exiv2Error
+
+	switch f {
+	case EXIF:
+		C.exiv2_exif_strip_key(i.img, ckey, &cErr)
+	case IPTC:
+		C.exiv2_iptc_strip_key(i.img, ckey, &cErr)
+	case XMP:
+		C.exiv2_xmp_strip_key(i.img, ckey, &cErr)
+	default:
+		return errors.New("invalid metadata format")
+	}
+
+	if cErr != nil {
+		err := makeError(cErr)
+		C.exiv2_error_free(cErr)
 		return err
 	}
 

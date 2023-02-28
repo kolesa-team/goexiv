@@ -61,6 +61,10 @@ Exiv2ExifDatumIterator* exiv2_exif_data_iterator(const Exiv2ExifData *data);
 int exiv2_exif_data_iterator_has_next(const Exiv2ExifDatumIterator *iter);
 Exiv2ExifDatum* exiv2_exif_datum_iterator_next(Exiv2ExifDatumIterator *iter);
 
+void exiv2_exif_strip_key(Exiv2Image *img, char *key, Exiv2Error **error);
+void exiv2_iptc_strip_key(Exiv2Image *img, char *key, Exiv2Error **error);
+void exiv2_xmp_strip_key(Exiv2Image *img, char *key, Exiv2Error **error);
+
 const unsigned char* exiv2_image_icc_profile(Exiv2Image *img);
 long exiv2_image_icc_profile_size(Exiv2Image *img);
 
