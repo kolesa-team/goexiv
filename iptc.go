@@ -145,3 +145,7 @@ func makeIptcDatumIterator(data *IptcData, cIter *C.Exiv2IptcDatumIterator) *Ipt
 
 	return datum
 }
+
+func (i *Image) IptcStripKey(key string) error {
+	return i.StripKey(IPTC, key)
+}

@@ -141,3 +141,7 @@ func makeExifDatumIterator(data *ExifData, cIter *C.Exiv2ExifDatumIterator) *Exi
 
 	return datum
 }
+
+func (i *Image) ExifStripKey(key string) error {
+	return i.StripKey(EXIF, key)
+}

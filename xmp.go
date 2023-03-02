@@ -84,3 +84,7 @@ func (d *XmpDatum) String() string {
 
 	return C.GoString(cstr)
 }
+
+func (i *Image) XmpStripKey(key string) error {
+	return i.StripKey(XMP, key)
+}

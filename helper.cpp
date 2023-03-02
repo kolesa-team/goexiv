@@ -401,6 +401,66 @@ Exiv2ExifDatum* exiv2_exif_datum_iterator_next(Exiv2ExifDatumIterator *iter)
 	return iter->next();
 }
 
+void
+exiv2_exif_strip_key(Exiv2Image *img, char *key, Exiv2Error **error)
+{
+    Exiv2::ExifData exifData = img->image->exifData();
+
+    try {
+        Exiv2::ExifData::iterator pos = exifData.findKey(Exiv2::ExifKey(key));
+        if (pos == exifData.end()) {
+            return;
+        }
+        exifData.erase(pos);
+        img->image->setExifData(exifData);
+        img->image->writeMetadata();
+    } catch (Exiv2::Error &e) {
+        if (error) {
+            *error = new Exiv2Error(e);
+        }
+    }
+}
+
+void
+exiv2_iptc_strip_key(Exiv2Image *img, char *key, Exiv2Error **error)
+{
+    Exiv2::IptcData iptcData = img->image->iptcData();
+
+    try {
+        Exiv2::IptcData::iterator pos = iptcData.findKey(Exiv2::IptcKey(key));
+        if (pos == iptcData.end()) {
+            return;
+        }
+        iptcData.erase(pos);
+        img->image->setIptcData(iptcData);
+        img->image->writeMetadata();
+    } catch (Exiv2::Error &e) {
+        if (error) {
+            *error = new Exiv2Error(e);
+        }
+    }
+}
+
+void
+exiv2_xmp_strip_key(Exiv2Image *img, char *key, Exiv2Error **error)
+{
+    Exiv2::XmpData xmpData = img->image->xmpData();
+
+    try {
+        Exiv2::XmpData::iterator pos = xmpData.findKey(Exiv2::XmpKey(key));
+        if (pos == xmpData.end()) {
+            return;
+        }
+        xmpData.erase(pos);
+        img->image->setXmpData(xmpData);
+        img->image->writeMetadata();
+    } catch (Exiv2::Error &e) {
+        if (error) {
+            *error = new Exiv2Error(e);
+        }
+    }
+}
+
 DEFINE_FREE_FUNCTION(exiv2_exif_data, Exiv2ExifData*);
 
 const char* exiv2_exif_datum_key(const Exiv2ExifDatum *datum)

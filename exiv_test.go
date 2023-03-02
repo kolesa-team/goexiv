@@ -447,6 +447,64 @@ func Test_GetBytes_Goroutine(t *testing.T) {
 	t.Logf("Allocated bytes after test:  %+v\n", memStats.HeapAlloc)
 }
 
+func TestExifStripKey(t *testing.T) {
+	img, err := goexiv.Open("testdata/pixel.jpg")
+	require.NoError(t, err)
+
+	err = img.SetExifString("Exif.Photo.UserComment", "123")
+	require.NoError(t, err)
+
+	err = img.ExifStripKey("Exif.Photo.UserComment")
+	require.NoError(t, err)
+
+	err = img.ReadMetadata()
+	require.NoError(t, err)
+
+	data := img.GetExifData()
+
+	_, err = data.GetString("Exif.Photo.UserComment")
+	require.Error(t, err)
+}
+
+func TestIptcStripKey(t *testing.T) {
+	img, err := goexiv.Open("testdata/pixel.jpg")
+	require.NoError(t, err)
+
+	err = img.SetIptcString("Iptc.Application2.Caption", "123")
+	require.NoError(t, err)
+
+	err = img.IptcStripKey("Iptc.Application2.Caption")
+	require.NoError(t, err)
+
+	err = img.ReadMetadata()
+	require.NoError(t, err)
+
+	data := img.GetIptcData()
+
+	_, err = data.GetString("Iptc.Application2.Caption")
+	require.Error(t, err)
+}
+
+func TestXmpStripKey(t *testing.T) {
+	t.Skip("XMP SetXmpString and GetString is not implemented yet")
+	//img, err := goexiv.Open("testdata/pixel.jpg")
+	//require.NoError(t, err)
+	//
+	//err = img.SetXmpString("Xmp.dc.description", "123")
+	//require.NoError(t, err)
+	//
+	//err = img.XmpStripKey("Xmp.dc.description")
+	//require.NoError(t, err)
+	//
+	//err = img.ReadMetadata()
+	//require.NoError(t, err)
+	//
+	//data := img.GetXmpData()
+	//
+	//_, err = data.GetString("Xmp.dc.description")
+	//require.Error(t, err)
+}
+
 func BenchmarkImage_GetBytes_KeepAlive(b *testing.B) {
 	bytes, err := ioutil.ReadFile("testdata/stripped_pixel.jpg")
 	require.NoError(b, err)
