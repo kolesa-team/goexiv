@@ -56,13 +56,15 @@ func makeImage(cimg *C.Exiv2Image, bytesPtr unsafe.Pointer) *Image {
 		img:           cimg,
 	}
 
-	runtime.SetFinalizer(img, func(x *Image) {
-		C.exiv2_image_free(x.img)
+	runtime.SetFinalizer(
+		img, func(x *Image) {
+			C.exiv2_image_free(x.img)
 
-		if x.bytesArrayPtr != nil {
-			C.free(x.bytesArrayPtr)
-		}
-	})
+			if x.bytesArrayPtr != nil {
+				C.free(x.bytesArrayPtr)
+			}
+		},
+	)
 
 	return img
 }
@@ -130,6 +132,10 @@ func SetLogMsgLevel(level LogMsgLevel) {
 
 // ReadMetadata reads the metadata of an Image
 func (i *Image) ReadMetadata() error {
+	if i.img == nil {
+		return errors.New("image is nil")
+	}
+
 	var cerr *C.Exiv2Error
 
 	C.exiv2_image_read_metadata(i.img, &cerr)
@@ -143,36 +149,69 @@ func (i *Image) ReadMetadata() error {
 	return nil
 }
 
-// Returns an image contents.
+// GetBytes returns an image contents.
 // If its metadata has been changed, the changes are reflected here.
 func (i *Image) GetBytes() []byte {
+	if i.img == nil {
+		return nil
+	}
+
 	size := C.exiv_image_get_size(i.img)
 	ptr := C.exiv_image_get_bytes_ptr(i.img)
 
-	return C.GoBytes(unsafe.Pointer(ptr), C.int(size))
+	if ptr == nil || size <= 0 {
+		return nil
+	}
+
+	result := C.GoBytes(unsafe.Pointer(ptr), C.int(size))
+	runtime.KeepAlive(i) // Prevent GC from freeing the C structure prematurely
+	return result
 }
 
 // PixelWidth returns the width of the image in pixels
 func (i *Image) PixelWidth() int64 {
-	return int64(C.exiv2_image_get_pixel_width(i.img))
+	if i.img == nil {
+		return 0
+	}
+	result := int64(C.exiv2_image_get_pixel_width(i.img))
+	runtime.KeepAlive(i)
+
+	return result
 }
 
 // PixelHeight returns the height of the image in pixels
 func (i *Image) PixelHeight() int64 {
-	return int64(C.exiv2_image_get_pixel_height(i.img))
+	if i.img == nil {
+		return 0
+	}
+	result := int64(C.exiv2_image_get_pixel_height(i.img))
+	runtime.KeepAlive(i)
+
+	return result
 }
 
 // ICCProfile returns the ICC profile or nil if the image doesn't has one.
 func (i *Image) ICCProfile() []byte {
+	if i.img == nil {
+		return nil
+	}
+
 	size := C.int(C.exiv2_image_icc_profile_size(i.img))
 	if size <= 0 {
 		return nil
 	}
-	return C.GoBytes(unsafe.Pointer(C.exiv2_image_icc_profile(i.img)), size)
+	result := C.GoBytes(unsafe.Pointer(C.exiv2_image_icc_profile(i.img)), size)
+	runtime.KeepAlive(i)
+
+	return result
 }
 
-// Sets an exif or iptc key with a given string value
+// SetMetadataString sets an exif or iptc key with a given string value
 func (i *Image) SetMetadataString(format, key, value string) error {
+	if i.img == nil {
+		return errors.New("image is nil")
+	}
+
 	if format != "iptc" && format != "exif" {
 		return errors.New("invalid metadata type: " + format)
 	}
@@ -202,8 +241,12 @@ func (i *Image) SetMetadataString(format, key, value string) error {
 	return nil
 }
 
-// Sets an exif or iptc key with a given short value
+// SetMetadataShort sets an exif or iptc key with a given short value
 func (i *Image) SetMetadataShort(format, key, value string) error {
+	if i.img == nil {
+		return errors.New("image is nil")
+	}
+
 	if format != "iptc" && format != "exif" {
 		return errors.New("invalid metadata type: " + format)
 	}
@@ -234,6 +277,10 @@ func (i *Image) SetMetadataShort(format, key, value string) error {
 }
 
 func (i *Image) StripKey(f MetadataFormat, key string) error {
+	if i.img == nil {
+		return errors.New("image is nil")
+	}
+
 	ckey := C.CString(key)
 	defer C.free(unsafe.Pointer(ckey))
 
