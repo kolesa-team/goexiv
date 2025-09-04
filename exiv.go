@@ -133,7 +133,7 @@ func SetLogMsgLevel(level LogMsgLevel) {
 // ReadMetadata reads the metadata of an Image
 func (i *Image) ReadMetadata() error {
 	if i.img == nil {
-		return errors.New("image is nil")
+		return errors.New("image instance is not initialized: underlying C structure is nil")
 	}
 
 	var cerr *C.Exiv2Error
@@ -164,7 +164,9 @@ func (i *Image) GetBytes() []byte {
 	}
 
 	result := C.GoBytes(unsafe.Pointer(ptr), C.int(size))
+
 	runtime.KeepAlive(i) // Prevent GC from freeing the C structure prematurely
+
 	return result
 }
 
@@ -174,6 +176,7 @@ func (i *Image) PixelWidth() int64 {
 		return 0
 	}
 	result := int64(C.exiv2_image_get_pixel_width(i.img))
+
 	runtime.KeepAlive(i)
 
 	return result
@@ -185,6 +188,7 @@ func (i *Image) PixelHeight() int64 {
 		return 0
 	}
 	result := int64(C.exiv2_image_get_pixel_height(i.img))
+
 	runtime.KeepAlive(i)
 
 	return result
@@ -201,6 +205,7 @@ func (i *Image) ICCProfile() []byte {
 		return nil
 	}
 	result := C.GoBytes(unsafe.Pointer(C.exiv2_image_icc_profile(i.img)), size)
+
 	runtime.KeepAlive(i)
 
 	return result
@@ -209,7 +214,7 @@ func (i *Image) ICCProfile() []byte {
 // SetMetadataString sets an exif or iptc key with a given string value
 func (i *Image) SetMetadataString(format, key, value string) error {
 	if i.img == nil {
-		return errors.New("image is nil")
+		return errors.New("image instance is not initialized: underlying C structure is nil")
 	}
 
 	if format != "iptc" && format != "exif" {
@@ -244,7 +249,7 @@ func (i *Image) SetMetadataString(format, key, value string) error {
 // SetMetadataShort sets an exif or iptc key with a given short value
 func (i *Image) SetMetadataShort(format, key, value string) error {
 	if i.img == nil {
-		return errors.New("image is nil")
+		return errors.New("image instance is not initialized: underlying C structure is nil")
 	}
 
 	if format != "iptc" && format != "exif" {
@@ -278,7 +283,7 @@ func (i *Image) SetMetadataShort(format, key, value string) error {
 
 func (i *Image) StripKey(f MetadataFormat, key string) error {
 	if i.img == nil {
-		return errors.New("image is nil")
+		return errors.New("image instance is not initialized: underlying C structure is nil")
 	}
 
 	ckey := C.CString(key)
